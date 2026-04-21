@@ -19,7 +19,7 @@ export default function RootLayout({
           <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
             {/* 로고: 홈으로 이동 */}
             <Link href="/" className="text-xl font-black tracking-tighter hover:opacity-70">
-              ARCHIVE 🍿
+              INFP Collecter's archive 🍿
             </Link>
 
             {/* 메뉴 버튼들 */}
