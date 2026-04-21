@@ -1,58 +1,67 @@
-import { createClient } from '../src/lib/supabase/server'
-import Link from 'next/link'
+// ... (import LineChart, Line, XAxis, YAxis, ResponsiveContainer 등)
 
-export default async function Home() {
-  // 1. 서버 전용 클라이언트를 가져옵니다 (await 필수!)
-  const supabase = await createClient()
+export default function Home() {
+  const [works, setWorks] = useState<any[]>([]);
+  const [sortType, setSortType] = useState('latest'); // 정렬: latest, high, low
 
-  // 2. Supabase 'works' 테이블에서 영화 목록 가져오기
-  const { data: works } = await supabase
-    .from('works')
-    .select('*')
-    .order('created_at', { ascending: false })
+  const fetchWorks = async () => {
+    let query = supabase.from('works').select('*');
+    
+    // 정렬 로직
+    if (sortType === 'latest') query = query.order('created_at', { ascending: false });
+    else if (sortType === 'high') query = query.order('average_rating', { ascending: false });
+    else if (sortType === 'low') query = query.order('average_rating', { ascending: true });
+
+    const { data } = await query;
+    if (data) setWorks(data);
+  };
+
+  // 그래프용 데이터 가공 (월별 평균 별점)
+  const chartData = works.reduce((acc: any[], work) => {
+    const month = work.viewing_period || 'Unknown'; // 시청 시기 기준
+    const existing = acc.find(d => d.month === month);
+    if (existing) {
+      existing.avg = Number(((existing.avg + work.average_rating) / 2).toFixed(1));
+    } else {
+      acc.push({ month, avg: work.average_rating });
+    }
+    return acc;
+  }, []).sort((a, b) => a.month.localeCompare(b.month)); // 월순 정렬
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-bold">우리들의 기록</h2>
-        <Link 
-          href="/admin" 
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-medium transition-colors"
-        >
-          + 새 작품 등록
-        </Link>
+    <div className="space-y-10">
+      {/* 📊 월간 별점 평균 그래프 */}
+      <section className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+        <h2 className="text-xl font-bold mb-6 flex items-center gap-2">📈 월간 평점 흐름 <span className="text-sm font-normal text-gray-400">(전체 기간)</span></h2>
+        <div className="h-64 w-full overflow-x-auto">
+          <div style={{ minWidth: '600px', height: '100%' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} />
+                <YAxis domain={[0, 5]} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                <Line type="monotone" dataKey="avg" stroke="#3b82f6" strokeWidth={4} dot={{ r: 6, fill: '#3b82f6' }} activeDot={{ r: 8 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </section>
+
+      {/* 🔄 정렬 스위치 */}
+      <div className="flex gap-2">
+        {['latest', 'high', 'low'].map((type) => (
+          <button 
+            key={type}
+            onClick={() => setSortType(type)}
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${sortType === type ? 'bg-black text-white' : 'bg-gray-100 text-gray-400'}`}
+          >
+            {type === 'latest' ? '최신순' : type === 'high' ? '평점 높은순' : '평점 낮은순'}
+          </button>
+        ))}
       </div>
 
-      {!works || works.length === 0 ? (
-        <div className="text-center py-32 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-          <p className="text-gray-400 text-lg">아직 등록된 영화가 없어요.</p>
-          <p className="text-gray-400 text-sm mt-2">첫 번째 영화를 등록해 보세요! 🍿</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {works.map((work) => (
-            <Link href={`/works/${work.id}`} key={work.id} className="group cursor-pointer">
-              <div className="aspect-[2/3] bg-gray-200 rounded-2xl overflow-hidden mb-3 shadow-sm group-hover:shadow-xl transition-shadow">
-                {work.poster_url ? (
-                  <img 
-                    src={work.poster_url} 
-                    alt={work.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    No Poster
-                  </div>
-                )}
-              </div>
-              <h3 className="font-bold text-lg truncate group-hover:text-blue-600 transition-colors">
-                {work.title}
-              </h3>
-              <p className="text-sm text-gray-500">{work.category}</p>
-            </Link>
-          ))}
-        </div>
-      )}
+      {/* 🎬 작품 리스트 (기존 코드 유지) */}
     </div>
-  )
+  );
 }
