@@ -1,70 +1,91 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '../../src/lib/supabase/client' // 경로 주의!
+import { createClient } from '../../src/lib/supabase/client'
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+export default function AdminPage() {
+  const [formData, setFormData] = useState({
+    title: '', category: '영화', viewing_period: '',
+    m1_review: '', m1_rating: 0, m1_date: '',
+    m2_review: '', m2_rating: 0, m2_date: '',
+    m3_review: '', m3_rating: 0, m3_date: ''
+  });
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  
   const router = useRouter()
   const supabase = createClient()
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    if (!formData.title) { alert('제목은 필수입니다!'); return; }
+    setIsUploading(true)
 
-    // Supabase에게 이메일과 비밀번호를 던져서 확인을 부탁합니다.
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (error) {
-      alert('로그인 실패: ' + error.message)
-      setLoading(false)
-    } else {
-      alert('반갑습니다! 로그인되었습니다. 🍿')
-      router.push('/') // 로그인이 성공하면 메인 화면으로 보냅니다.
-      router.refresh() // 화면을 새로고침해서 로그인 상태를 반영합니다.
+    let finalImageUrl = ''
+    if (file) {
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}`
+      const { data: uploadData, error: uploadError } = await supabase.storage.from('posters').upload(fileName, file)
+      if (!uploadError) {
+        const { data } = supabase.storage.from('posters').getPublicUrl(fileName)
+        finalImageUrl = data.publicUrl
+      }
     }
+
+    const avgRating = (Number(formData.m1_rating) + Number(formData.m2_rating) + Number(formData.m3_rating)) / 3
+
+    const { error } = await supabase.from('works').insert([{
+      ...formData,
+      poster_url: finalImageUrl,
+      average_rating: Number(avgRating.toFixed(1))
+    }])
+
+    setIsUploading(false)
+    if (error) { alert('에러: ' + error.message) } 
+    else { alert('등록 성공! 🍿'); router.push('/'); router.refresh(); }
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-8 bg-white rounded-3xl shadow-xl border border-gray-100">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Media Archive</h1>
-      <p className="text-gray-500 text-center mb-8">관리자 전용 로그인</p>
+    <div className="max-w-2xl mx-auto py-12 px-4">
+      <h1 className="text-3xl font-bold mb-8">새 작품 등록</h1>
+      <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+        <div>
+          <label className="block text-sm font-bold mb-2">작품 제목</label>
+          <input type="text" required value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-bold mb-2">분류</label>
+          <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full border p-3 rounded-xl">
+            <option value="영화">🎬 영화</option>
+            <option value="드라마">📺 드라마</option>
+          </select>
+        </div>
 
-      <form onSubmit={handleLogin} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">이메일</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="example@gmail.com"
-            required
-          />
+          <label className="block text-sm font-bold mb-2 text-blue-600">시청 시기 (예: 2024-02)</label>
+          <input type="text" value={formData.viewing_period} onChange={(e) => setFormData({...formData, viewing_period: e.target.value})} className="w-full border p-3 rounded-xl" placeholder="YYYY-MM 형식 추천" />
         </div>
+
         <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-1">비밀번호</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="••••••••"
-            required
-          />
+          <label className="block text-sm font-bold mb-2">포스터 파일</label>
+          <input type="file" accept="image/*" onChange={(e) => e.target.files && setFile(e.target.files[0])} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:bg-blue-50 file:text-blue-700" />
         </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all disabled:bg-gray-300"
-        >
-          {loading ? '확인 중...' : '로그인하기'}
+
+        {/* 멤버 1 섹션 */}
+        <div className="border-t pt-6">
+          <h3 className="font-bold mb-3">❄️ 멤버 1 후기</h3>
+          <textarea value={formData.m1_review} onChange={(e) => setFormData({...formData, m1_review: e.target.value})} className="w-full border p-3 rounded-xl h-24 mb-2" />
+          <div className="flex gap-4">
+            <input type="number" step="0.5" placeholder="평점" value={formData.m1_rating} onChange={(e) => setFormData({...formData, m1_rating: e.target.value})} className="border p-2 rounded-lg w-20" />
+            <input type="text" placeholder="날짜" value={formData.m1_date} onChange={(e) => setFormData({...formData, m1_date: e.target.value})} className="border p-2 rounded-lg flex-1" />
+          </div>
+        </div>
+
+        {/* 멤버 2, 3은 위와 같은 방식으로 반복해서 추가하거나 일단 이대로 올리셔도 됩니다! */}
+
+        <button type="submit" disabled={isUploading} className="w-full py-4 bg-black text-white rounded-2xl font-bold shadow-lg hover:bg-gray-800 disabled:bg-gray-400">
+          {isUploading ? '기록 창고에 넣는 중...' : '기록 저장하기'}
         </button>
       </form>
     </div>
