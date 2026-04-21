@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
 
 export default function AddWorkPage() {
@@ -12,7 +12,7 @@ export default function AddWorkPage() {
   const [video, setVideo] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   
-  const supabase = createClientComponentClient()
+  const supabase = createBrowserClient()
   const router = useRouter()
 
   // 파일 업로드 자동화 함수
