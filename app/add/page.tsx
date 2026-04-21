@@ -12,7 +12,10 @@ export default function AddWorkPage() {
   const [video, setVideo] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   
-  const supabase = createBrowserClient()
+  const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
   const router = useRouter()
 
   // 파일 업로드 자동화 함수
