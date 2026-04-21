@@ -13,9 +13,15 @@ export default function Home() {
   useEffect(() => {
     async function fetchWorks() {
       let query = supabase.from('works').select('*')
-      if (sortType === 'latest') query = query.order('created_at', { ascending: false })
-      else if (sortType === 'high') query = query.order('average_rating', { ascending: false })
-      else if (sortType === 'low') query = query.order('average_rating', { ascending: true })
+      
+      if (sortType === 'latest') {
+        // 1순위: 생성일 역순, 2순위: ID 역순
+        query = query.order('created_at', { ascending: false }).order('id', { ascending: false })
+      } else if (sortType === 'high') {
+        query = query.order('average_rating', { ascending: false })
+      } else if (sortType === 'low') {
+        query = query.order('average_rating', { ascending: true })
+      }
 
       const { data } = await query
       if (data) setWorks(data)
