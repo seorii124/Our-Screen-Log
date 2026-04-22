@@ -34,7 +34,7 @@ export default async function RootLayout({
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-  // [태초의 로직] 로그아웃 서버 액션 완벽 유지
+  // 로그아웃 서버 액션 유지
   async function handleLogout() {
     "use server";
     const actionCookieStore = await cookies();
@@ -60,14 +60,12 @@ export default async function RootLayout({
   return (
     <html lang="ko">
       <body className={`${inter.className} bg-neutral-900 text-neutral-100 min-h-screen`}>
-        {/* 네비게이션: 왓챠피디아 스타일로 확장 */}
         <nav className="flex justify-between items-center px-10 py-5 border-b border-neutral-800 bg-black sticky top-0 z-50">
           <div className="flex items-center gap-12">
             <Link href="/" className="text-2xl font-black tracking-tighter text-white italic flex items-center gap-2">
               <span>🍿</span> OUR SCREEN LOG
             </Link>
             
-            {/* 카테고리 메뉴: 누구나 볼 수 있게 배치 */}
             <div className="hidden md:flex items-center gap-10 text-sm font-bold text-neutral-400">
               <Link href="/stats" className="hover:text-white transition">통계</Link>
               <Link href="/scenes" className="hover:text-white transition">명장면</Link>
@@ -78,17 +76,30 @@ export default async function RootLayout({
           <div className="flex items-center gap-6">
             {!userError && user ? (
               <div className="flex items-center gap-6 border-l border-neutral-800 pl-6">
-                <span className="hidden lg:inline text-xs text-neutral-500 font-medium">{user.email}</span>
-                {/* 중복 제거된 깔끔한 역할 배지 */}
+                
+                {/* [수정] 이메일에만 마이로그 링크 활성화 */}
+                <Link 
+                  href="/my-log" 
+                  className="text-xs text-neutral-500 font-medium hover:text-blue-400 transition-colors"
+                >
+                  {user.email}
+                </Link>
+
+                {/* 배지는 클릭되지 않는 일반 텍스트로 복구 */}
                 <span className="px-2 py-1 bg-neutral-800 text-[10px] font-black rounded text-white uppercase tracking-widest">
                   {user?.user_metadata?.role || "Member"}
                 </span>
+
                 <form action={handleLogout}>
-                  <button type="submit" className="text-red-400 text-sm font-bold hover:text-red-300 transition">Logout</button>
+                  <button type="submit" className="text-red-400 text-sm font-bold hover:text-red-300 transition">
+                    Logout
+                  </button>
                 </form>
               </div>
             ) : (
-              <Link href="/login" className="text-sm font-bold text-blue-500 hover:underline">Admin Login</Link>
+              <Link href="/login" className="text-sm font-bold text-blue-500 hover:underline">
+                Admin Login
+              </Link>
             )}
           </div>
         </nav>
