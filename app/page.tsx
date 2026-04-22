@@ -14,7 +14,7 @@ export default function Home() {
     async function fetchWorks() {
       let query = supabase.from('works').select('*')
       
-      // 최신순 정렬 로직 강화 (생성일자 + ID 역순으로 절대 안 꼬이게 고정)
+      // 최신순 정렬 고정 (생성일자 + ID 역순)
       if (sortType === 'latest') {
         query = query.order('created_at', { ascending: false }).order('id', { ascending: false })
       } else if (sortType === 'high') {
@@ -33,7 +33,7 @@ export default function Home() {
     <div className="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
       <header className="mb-12 pt-10">
         <h1 className="text-4xl font-black text-gray-900 tracking-tighter mb-2">Our Screen Log 🍿</h1>
-        <p className="text-gray-400 font-bold tracking-widest text-xs uppercase">INFP Collector's Archive</p>
+        <p className="text-gray-400 font-bold tracking-widest text-xs uppercase">INFP Collecter's archive</p>
       </header>
       
       <div className="flex justify-between items-center mb-8">
@@ -44,7 +44,6 @@ export default function Home() {
             </button>
           ))}
         </div>
-        <button onClick={() => router.push('/admin')} className="bg-blue-600 text-white px-5 py-2 rounded-full text-xs font-black hover:bg-blue-700 transition-all">새 기록 등록</button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

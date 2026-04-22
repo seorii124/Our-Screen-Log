@@ -2,45 +2,28 @@ import './globals.css'
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Archiving Page🍿',
-  description: '영화와 드라마 기록 저장소',
+  title: 'THE ARCHIVE',
+  description: 'INFP Collecter\'s archive',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
       <body className="bg-gray-50 text-black">
-        {/* 상단 메뉴바 (Navigation) */}
-        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-          <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-            {/* 로고: 홈으로 이동 */}
-            <Link href="/" className="text-xl font-black tracking-tighter hover:opacity-70">
-              INFP Collecter's archive 🍿
-            </Link>
-
-            {/* 메뉴 버튼들 */}
-            <div className="flex gap-6 items-center">
-              <Link href="/" className="text-sm font-bold hover:text-blue-600 transition-colors">
-                HOME
-              </Link>
-              <Link href="/stats" className="text-sm font-bold hover:text-blue-600 transition-colors">
-                STATS
-              </Link>
-              <Link href="/admin" className="bg-black text-white px-4 py-2 rounded-full text-xs font-black hover:bg-gray-800 transition-all">
-                RECORD
-              </Link>
+        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-50">
+          <div className="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
+            <Link href="/" className="text-2xl font-black tracking-tighter">ARCHIVE 🍿</Link>
+            <div className="flex gap-8 items-center">
+              <Link href="/" className="text-[11px] font-black tracking-widest text-gray-400 hover:text-black uppercase">Home</Link>
+              <Link href="/stats" className="text-[11px] font-black tracking-widest text-gray-400 hover:text-black uppercase">Stats</Link>
+              {/* 관리자님 전용 RECORD 버튼 */}
+              <Link href="/admin" className="bg-black text-white px-5 py-2.5 rounded-full text-[10px] font-black tracking-widest hover:bg-gray-800 transition-all shadow-lg shadow-black/10">RECORD</Link>
+              {/* 로그인 상태 표시 복구 */}
+              <div className="ml-4 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-[10px] font-black text-blue-600 border border-blue-200" title="Admin logged in">JI</div>
             </div>
           </div>
         </nav>
-
-        {/* 실제 페이지 내용들 */}
-        <main>
-          {children}
-        </main>
+        <main>{children}</main>
       </body>
     </html>
   )
