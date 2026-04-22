@@ -1,59 +1,95 @@
 'use client'
 
 import { useState } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  
   const router = useRouter()
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    setLoading(true)
+    setError(null)
 
-    // 관리자님 전용 비밀번호 (원하시는 대로 바꾸세요!)
-    if (password === '1234') {
-      // 로그인이 성공하면 관리자 페이지로 이동
-      router.push('/admin')
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      setError('로그인 정보가 올바르지 않습니다.')
+      setLoading(false)
     } else {
-      alert('비밀번호가 일치하지 않습니다.')
-      setIsLoading(false)
+      router.push('/')
+      router.refresh()
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-gray-100 w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-black uppercase tracking-tighter text-gray-900">Admin Access</h1>
-          <p className="text-gray-400 text-xs font-bold mt-2">기록고 관리를 위해 인증이 필요합니다</p>
+    <div className="flex items-center justify-center min-h-[calc(100vh-80px)] bg-neutral-900 p-6">
+      <div className="w-full max-w-[400px] bg-white rounded-[2.5rem] p-10 shadow-2xl">
+        <div className="text-center mb-10">
+          <h1 className="text-2xl font-black tracking-tighter text-black uppercase">Admin Access</h1>
+          <p className="text-[11px] font-bold text-neutral-400 mt-2">기록고 관리를 위해 인증이 필요합니다</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              placeholder="Password" 
-              className="w-full bg-gray-50 border-0 p-5 rounded-2xl outline-none focus:ring-2 focus:ring-black font-bold text-center transition-all"
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-neutral-400 ml-1">Email Address</label>
+            <input
+              type="email"
+              placeholder="admin@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
+              className="w-full px-6 py-4 bg-neutral-100 rounded-2xl text-black font-bold placeholder:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-black transition-all"
             />
           </div>
-          
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full py-5 bg-black text-white rounded-2xl font-black shadow-xl hover:bg-gray-800 active:scale-95 transition-all disabled:bg-gray-200"
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-neutral-400 ml-1">Password</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-6 py-4 bg-neutral-100 rounded-2xl text-black font-bold placeholder:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-black transition-all"
+            />
+          </div>
+
+          {error && (
+            <p className="text-center text-red-500 text-xs font-bold animate-pulse">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-5 bg-black text-white rounded-2xl font-black uppercase tracking-widest hover:bg-neutral-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
           >
-            {isLoading ? 'VERIFYING...' : 'ENTER'}
+            {loading ? 'Authenticating...' : 'Enter'}
           </button>
         </form>
 
-        <p className="text-center mt-8 text-[10px] text-gray-300 font-medium tracking-widest uppercase">
-          Private Archive System v1.0
-        </p>
+        <div className="mt-10 text-center">
+          <p className="text-[9px] font-black text-neutral-300 uppercase tracking-widest">
+            Private Archive System v1.1
+          </p>
+          <Link href="/" className="inline-block mt-4 text-[10px] font-bold text-neutral-400 hover:text-black transition-colors underline">
+            Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   )
