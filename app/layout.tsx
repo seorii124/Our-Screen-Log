@@ -1,60 +1,94 @@
-'use client'
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { cookies } from "next/headers";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 
-import './globals.css'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+const inter = Inter({ subsets: ["latin"] });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  
-  // 임시 데이터 (로그인 기능 연동 전까지 화면 표시용)
-  const userEmail = "admin@archive.com"; 
-  const userRole = "관리자 (Master)";
+export const metadata: Metadata = {
+  title: "THE ARCHIVE | Our Screen Log",
+  description: "INFP Collecter's archive",
+};
 
-  const handleLogout = () => {
-    if(confirm("로그아웃 하시겠습니까?")) {
-      router.push('/login');
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const cookieStore = await cookies();
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+      },
     }
-  };
+  );
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  async function handleLogout() {
+    "use server";
+    const actionCookieStore = await cookies();
+    
+    const actionSupabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return actionCookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            try { actionCookieStore.set({ name, value, ...options }); } catch {}
+          },
+          remove(name: string, options: CookieOptions) {
+            try { actionCookieStore.set({ name, value: "", ...options, maxAge: 0 }); } catch {}
+          },
+        },
+      }
+    );
+
+    await actionSupabase.auth.signOut();
+    redirect("/login");
+  }
 
   return (
     <html lang="ko">
-      <body className="bg-gray-50 text-black">
-        <nav className="sticky top-0 z-50 bg-white border-b border-gray-100">
-          <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-            <Link href="/" className="text-2xl font-black tracking-tighter italic">THE ARCHIVE</Link>
-            
-            <div className="flex gap-8 items-center">
-              <Link href="/" className="text-xs font-bold hover:text-blue-600 uppercase">Home</Link>
-              <Link href="/stats" className="text-xs font-bold hover:text-blue-600 uppercase">Stats</Link>
-              <Link href="/admin" className="bg-black text-white px-5 py-2 rounded-full text-xs font-bold hover:bg-gray-800 transition-all">RECORD</Link>
-              
-              {/* 계정 정보 섹션 */}
-              <div className="group relative flex items-center gap-3 pl-6 border-l border-gray-100 cursor-pointer">
-                <div className="text-right">
-                  <p className="text-[11px] font-black leading-none">{userEmail.split('@')[0]}</p>
-                  <p className="text-[9px] text-blue-600 font-bold mt-1 uppercase">{userRole}</p>
-                </div>
-                <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold border border-gray-200">
-                  User
-                </div>
-                
-                {/* 드롭다운 메뉴 (마우스 올리면 노출) */}
-                <div className="absolute right-0 top-full pt-2 hidden group-hover:block w-48">
-                  <div className="bg-white border border-gray-100 shadow-xl rounded-2xl p-4">
-                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Full Account</p>
-                    <p className="text-xs font-bold mb-4 break-all">{userEmail}</p>
-                    <button onClick={handleLogout} className="w-full py-2 bg-red-50 text-red-600 text-[10px] font-bold rounded-lg hover:bg-red-100 transition-all">
-                      LOGOUT
-                    </button>
-                  </div>
-                </div>
+      <body className={`${inter.className} bg-neutral-900 text-neutral-100 min-h-screen`}>
+        {!userError && user && (
+          <nav className="flex justify-between items-center p-6 border-b border-neutral-800 bg-neutral-950">
+            <Link href="/" className="text-xl font-black tracking-tighter hover:text-neutral-400 transition italic">
+              THE ARCHIVE
+            </Link>
+            <div className="flex items-center gap-6 text-sm">
+              <Link href="/stats" className="hover:text-blue-400 font-bold transition">Stats</Link>
+              <div className="flex items-center gap-2 text-neutral-400">
+                <span>{user?.email}</span>
+                <span className="px-2 py-1 bg-neutral-800 text-white rounded text-[10px] font-black uppercase">
+                  {user?.user_metadata?.role || "Member"}
+                </span>
               </div>
+              <form action={handleLogout}>
+                <button type="submit" className="text-red-400 font-bold hover:text-red-300 transition">
+                  Logout
+                </button>
+              </form>
             </div>
-          </div>
-        </nav>
+          </nav>
+        )}
         <main>{children}</main>
       </body>
     </html>
-  )
+  );
 }
