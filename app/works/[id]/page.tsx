@@ -42,7 +42,11 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-3xl shadow-sm border border-gray-100 mb-20">
       <div className="flex justify-between items-center mb-8">
         <button onClick={() => router.push('/')} className="text-gray-400 hover:text-blue-500 transition-colors text-sm font-medium">← 목록으로 돌아가기</button>
-        <button onClick={() => router.push(`/admin/edit/${currentId}`)} className="bg-gray-900 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-blue-600 transition-all">내용 수정하기</button>
+        
+        {/* ★ 수정된 부분: 경로를 /works/[id]/edit 으로 정확히 연결 ★ */}
+        <button onClick={() => router.push(`/works/${currentId}/edit`)} className="bg-gray-900 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-blue-600 transition-all">
+          내용 수정하기
+        </button>
       </div>
 
       <div className="border-b border-gray-50 pb-8 mb-8">
