@@ -42,8 +42,6 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-3xl shadow-sm border border-gray-100 mb-20">
       <div className="flex justify-between items-center mb-8">
         <button onClick={() => router.push('/')} className="text-gray-400 hover:text-blue-500 transition-colors text-sm font-medium">← 목록으로 돌아가기</button>
-        
-        {/* ★ 수정된 부분: 경로를 /works/[id]/edit 으로 정확히 연결 ★ */}
         <button onClick={() => router.push(`/works/${currentId}/edit`)} className="bg-gray-900 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-blue-600 transition-all">
           내용 수정하기
         </button>
@@ -64,24 +62,43 @@ export default function WorkDetailPage({ params }: { params: Promise<{ id: strin
         </div>
       )}
 
+      {/* ★ 지각 체크용 멤버별 완료일 표기 추가 완료 ★ */}
       <div className="space-y-8">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">멤버별 한줄평</h2>
         
         {work.m1_review && (
           <div className="bg-blue-50/40 p-6 rounded-3xl border border-blue-100/50">
-            <div className="flex justify-between mb-4"><div className="text-3xl">❄️</div> <div className="text-blue-500 font-bold">⭐ {work.m1_rating}</div></div>
+            <div className="flex justify-between items-start mb-4">
+              <div className="text-3xl">❄️</div> 
+              <div className="text-right">
+                <div className="text-blue-500 font-black text-lg">⭐ {work.m1_rating}</div>
+                {work.m1_date && <div className="text-[10px] text-gray-500 font-bold mt-1">{work.m1_date} 완료</div>}
+              </div>
+            </div>
             <p className="text-gray-700 italic">"{work.m1_review}"</p>
           </div>
         )}
         {work.m2_review && (
           <div className="bg-purple-50/40 p-6 rounded-3xl border border-purple-100/50">
-            <div className="flex justify-between mb-4"><div className="text-3xl">🍇</div> <div className="text-purple-500 font-bold">⭐ {work.m2_rating}</div></div>
+            <div className="flex justify-between items-start mb-4">
+              <div className="text-3xl">🍇</div> 
+              <div className="text-right">
+                <div className="text-purple-500 font-black text-lg">⭐ {work.m2_rating}</div>
+                {work.m2_date && <div className="text-[10px] text-gray-500 font-bold mt-1">{work.m2_date} 완료</div>}
+              </div>
+            </div>
             <p className="text-gray-700 italic">"{work.m2_review}"</p>
           </div>
         )}
         {work.m3_review && (
           <div className="bg-yellow-50/40 p-6 rounded-3xl border border-yellow-100/50">
-            <div className="flex justify-between mb-4"><div className="text-3xl">🍦</div> <div className="text-yellow-600 font-bold">⭐ {work.m3_rating}</div></div>
+            <div className="flex justify-between items-start mb-4">
+              <div className="text-3xl">🍦</div> 
+              <div className="text-right">
+                <div className="text-yellow-600 font-black text-lg">⭐ {work.m3_rating}</div>
+                {work.m3_date && <div className="text-[10px] text-gray-500 font-bold mt-1">{work.m3_date} 완료</div>}
+              </div>
+            </div>
             <p className="text-gray-700 italic">"{work.m3_review}"</p>
           </div>
         )}

@@ -23,11 +23,10 @@ export default function MyLogPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  // ★ 못 박은 순서 완벽 적용 ★
   const getMemberNum = (email: string) => {
-    if (email === 'seorii40@gmail.com') return 1;   // 1번: 나
-    if (email === 'onlyziyu76@gmail.com') return 2; // 2번: 포도 🍇
-    if (email === 'mooddnnaa@gmail.com') return 3;  // 3번: 아이스크림 🍦
+    if (email === 'seorii40@gmail.com') return 1;
+    if (email === 'onlyziyu76@gmail.com') return 2;
+    if (email === 'mooddnnaa@gmail.com') return 3;
     return 0;
   }
 
@@ -59,10 +58,9 @@ export default function MyLogPage() {
     fetchMyLogs()
   }, [supabase, router])
 
-  if (loading) return <div className="p-10 text-center font-black text-black">LOADING MY ARCHIVE...</div>
+  if (loading) return <div className="p-20 text-center font-black text-black">데이터를 불러오는 중...</div>
 
-  // 번호에 따른 임티 지정
-  const memberEmoji = memberNum === 1 ? '❄️' : memberNum === 2 ? '🍇' : memberNum === 3 ? '🍦' : '';
+  const memberEmoji = memberNum === 1 ? '❄️' : memberNum === 2 ? '🍇' : memberNum === 3 ? '🍦' : '❓';
 
   return (
     <div className="max-w-7xl mx-auto p-10 min-h-screen pb-32">
@@ -76,10 +74,11 @@ export default function MyLogPage() {
       </header>
 
       {works.length === 0 ? (
-        <div className="py-20 text-center border-2 border-dashed border-neutral-200 rounded-[3rem]">
-          <p className="text-neutral-400 font-bold">아직 평가를 남긴 작품이 없습니다.</p>
-          <Link href="/" className="text-blue-600 font-black text-xs uppercase mt-4 inline-block underline">
-            Go to Archive
+        <div className="py-20 text-center border-2 border-dashed border-neutral-200 rounded-[3rem] bg-white">
+          <p className="text-neutral-400 font-bold mb-4">아직 {memberEmoji} 멤버가 평가를 남긴 작품이 없습니다.</p>
+          <p className="text-xs text-neutral-300 mb-6 italic">(평점이 0보다 큰 데이터만 표시됩니다)</p>
+          <Link href="/" className="text-blue-600 font-black text-xs uppercase underline">
+            전체 보러가기
           </Link>
         </div>
       ) : (
@@ -96,10 +95,11 @@ export default function MyLogPage() {
                 <h2 className="font-bold text-base text-neutral-900 line-clamp-1 group-hover:text-blue-600 transition-colors">
                   {work.title}
                 </h2>
+                {/* ★ 마이로그 완료일 추가 적용 완료 ★ */}
                 <div className="flex items-center gap-2 text-[10px] font-bold text-neutral-500 uppercase tracking-tighter">
                   <span>{work.category}</span>
-                  <span>•</span>
-                  <span>{work[`m${memberNum}_date`]} 시청</span>
+                  <span className="text-neutral-300">•</span>
+                  <span className="text-blue-500">{work[`m${memberNum}_date`]} 완료</span>
                 </div>
               </div>
             </Link>

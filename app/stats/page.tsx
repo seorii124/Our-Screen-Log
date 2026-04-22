@@ -1,134 +1,90 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell
-} from 'recharts'
+import { createClient } from '../../src/lib/supabase/client'
 
 export default function StatsPage() {
-  const [chartData, setChartData] = useState<any[]>([])
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const [stats, setStats] = useState<any>({
+    movieCount: 0,
+    dramaCount: 0,
+    monthlyData: []
+  })
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
 
   useEffect(() => {
     async function fetchStats() {
-      const { data, error } = await supabase.from('works').select('viewing_period, average_rating')
-      
-      if (error || !data) return
-
-      // 1. 데이터 파싱 및 그룹화 로직
-      const groups: { [key: string]: { sum: number; count: number } } = {}
-
-      data.forEach((work) => {
-        // '25년 9월' -> '2025-09' 형태로 변환
-        const period = work.viewing_period // 예: "25년 9월"
-        const match = period.match(/(\d+)년\s*(\d+)월/)
+      const { data } = await supabase.from('works').select('*')
+      if (data) {
+        const movies = data.filter(w => w.category === '영화').length
+        const dramas = data.filter(w => w.category === '드라마').length
         
-        if (match) {
-          const year = `20${match[1]}`
-          const month = match[2].padStart(2, '0')
-          const key = `${year}-${month}`
+        // 월별 (viewing_period) 집계
+        const months: Record<string, { movie: number, drama: number }> = {}
+        data.forEach(w => {
+          const m = w.viewing_period || '미분류'
+          if (!months[m]) months[m] = { movie: 0, drama: 0 }
+          
+          if (w.category === '영화') months[m].movie++
+          else if (w.category === '드라마') months[m].drama++
+        })
 
-          if (!groups[key]) groups[key] = { sum: 0, count: 0 }
-          groups[key].sum += work.average_rating || 0
-          groups[key].count += 1
-        }
-      })
+        // 월별 내림차순 정렬 (최근 달이 위로 오게)
+        const sortedMonths = Object.keys(months)
+          .sort((a, b) => b.localeCompare(a))
+          .map(m => ({
+            name: m,
+            ...months[m]
+          }))
 
-      // 2. 차트 데이터 배열로 변환 및 시간순 정렬
-      const formattedData = Object.keys(groups)
-        .sort() // 2025-09, 2025-10... 순서로 정렬
-        .map((key) => ({
-          month: key,
-          average: Number((groups[key].sum / groups[key].count).toFixed(1)),
-          count: groups[key].count
-        }))
-
-      setChartData(formattedData)
+        setStats({
+          movieCount: movies,
+          dramaCount: dramas,
+          monthlyData: sortedMonths
+        })
+      }
+      setLoading(false)
     }
-
     fetchStats()
-  }, [supabase])
+  }, [])
+
+  if (loading) return <div className="p-20 text-center font-black">ANALYZING...</div>
 
   return (
-    <div className="max-w-6xl mx-auto p-10 min-h-screen text-white">
+    <div className="max-w-4xl mx-auto p-10 min-h-screen">
       <header className="mb-12">
-        <h1 className="text-4xl font-black italic tracking-tighter mb-2 text-white">Watching Analysis</h1>
-        <p className="text-neutral-500 font-bold text-xs uppercase tracking-[0.2em]">시간 흐름에 따른 평점 추이</p>
+        {/* ★ 타이틀 검정색(text-neutral-900) 수정 및 불필요 문구 삭제 ★ */}
+        <h1 className="text-4xl font-black text-neutral-900 tracking-tighter italic">Watching Analysis</h1>
+        <p className="text-neutral-400 text-xs font-bold mt-2 uppercase tracking-widest">Team INFP Collector Archive</p>
       </header>
 
-      {/* 메인 차트 카드 */}
-      <section className="bg-black border border-neutral-800 p-10 rounded-[2.5rem] shadow-2xl">
-        <div className="flex justify-between items-center mb-10">
-          <h2 className="text-xl font-bold">월별 평균 평점 추이</h2>
-          <div className="flex gap-4 text-[10px] font-black text-neutral-500 uppercase">
-            <div className="flex items-center gap-1.5"><span className="w-2 h-2 bg-blue-600 rounded-full"></span> 평균 평점</div>
-          </div>
+      {/* 심플해진 영화 / 드라마 개수 요약 카드 */}
+      <div className="grid grid-cols-2 gap-6 mb-12">
+        <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
+          <p className="text-[10px] font-black text-gray-400 uppercase mb-2">Total Movies</p>
+          <p className="text-3xl font-black text-black">{stats.movieCount} <span className="text-sm text-gray-300">FILMS</span></p>
         </div>
-
-        <div className="h-[400px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} />
-              <XAxis 
-                dataKey="month" 
-                stroke="#525252" 
-                fontSize={12} 
-                tickLine={false} 
-                axisLine={false} 
-                dy={10}
-              />
-              <YAxis 
-                stroke="#525252" 
-                fontSize={12} 
-                tickLine={false} 
-                axisLine={false} 
-                domain={[0, 5]}
-              />
-              <Tooltip 
-                cursor={{ fill: '#171717' }}
-                contentStyle={{ backgroundColor: '#000', border: '1px solid #262626', borderRadius: '12px' }}
-                itemStyle={{ color: '#2563eb', fontWeight: 'bold' }}
-              />
-              <Bar dataKey="average" radius={[6, 6, 0, 0]} barSize={40}>
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.average >= 4 ? '#2563eb' : '#3b82f6'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
-
-      {/* 하단 상세 통계 그리드 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
-        <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-3xl">
-          <p className="text-xs font-bold text-neutral-500 uppercase mb-2">총 기록 기간</p>
-          <p className="text-2xl font-black">{chartData.length}개월</p>
-        </div>
-        <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-3xl">
-          <p className="text-xs font-bold text-neutral-500 uppercase mb-2">전체 평균 평점</p>
-          <p className="text-2xl font-black text-blue-500">
-            {(chartData.reduce((acc, cur) => acc + cur.average, 0) / chartData.length || 0).toFixed(1)}
-          </p>
-        </div>
-        <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-3xl">
-          <p className="text-xs font-bold text-neutral-500 uppercase mb-2">가장 많이 본 달</p>
-          <p className="text-2xl font-black text-emerald-500">
-            {chartData.length > 0 ? [...chartData].sort((a, b) => b.count - a.count)[0].month : '-'}
-          </p>
+        <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
+          <p className="text-[10px] font-black text-gray-400 uppercase mb-2">Total Dramas</p>
+          <p className="text-3xl font-black text-black">{stats.dramaCount} <span className="text-sm text-gray-300">SERIES</span></p>
         </div>
       </div>
+
+      {/* 월별 기록 리스트 (모바일에서도 가로로 돌릴 필요 없음) */}
+      <section className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl">
+        <h2 className="text-xl font-black mb-8 border-b pb-4 text-black">Monthly Records</h2>
+        <div className="space-y-6">
+          {stats.monthlyData.map((m: any) => (
+            <div key={m.name} className="flex justify-between items-center border-b border-gray-50 pb-4">
+              <span className="font-bold text-gray-900">{m.name}</span>
+              <div className="flex gap-4">
+                <span className="text-xs font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full">영화 {m.movie}</span>
+                <span className="text-xs font-black text-purple-500 bg-purple-50 px-3 py-1 rounded-full">드라마 {m.drama}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

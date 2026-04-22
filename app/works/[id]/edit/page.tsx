@@ -28,13 +28,12 @@ export default function EditPage() {
     checkUser();
   }, [editId]);
 
-  // ★ 이메일 & 권한 고정 ★
   async function checkUser() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user && user.email) {
       if (user.email === 'seorii40@gmail.com') { 
         setMyMemberNum(1); 
-        setIsAdmin(true); // 1번 & 관리자 권한
+        setIsAdmin(true); 
       }
       else if (user.email === 'onlyziyu76@gmail.com') { 
         setMyMemberNum(2); 
@@ -98,7 +97,6 @@ export default function EditPage() {
       <h1 className="text-3xl font-black mb-8 italic text-white">Edit Record ✍️</h1>
       <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl text-black">
         
-        {/* 관리자만 기본 정보 수정 가능 */}
         <div>
           <label className="block text-[10px] font-black uppercase mb-2 ml-1 text-gray-400">Title</label>
           <input name="title" type="text" required value={formData.title} onChange={handleChange} disabled={!isAdmin} className="w-full bg-gray-50 p-4 rounded-2xl outline-none disabled:opacity-50" />
@@ -108,11 +106,10 @@ export default function EditPage() {
             <option value="영화">🎬 영화</option>
             <option value="드라마">📺 드라마</option>
           </select>
-          <input name="viewing_period" type="text" value={formData.viewing_period} onChange={handleChange} disabled={!isAdmin} className="bg-gray-50 p-4 rounded-2xl font-bold disabled:opacity-50" placeholder="YYYY-MM (완료일)" />
+          <input name="viewing_period" type="text" value={formData.viewing_period} onChange={handleChange} disabled={!isAdmin} className="bg-gray-50 p-4 rounded-2xl font-bold disabled:opacity-50" placeholder="YYYY-MM (선정 월)" />
         </div>
         {isAdmin && <input type="file" accept="image/*" onChange={(e) => e.target.files && setFile(e.target.files[0])} className="w-full text-xs text-gray-400" />}
 
-        {/* 멤버별 리뷰 작성 칸 */}
         {[1, 2, 3].map((n) => {
           const isMeOrAdmin = isAdmin || myMemberNum === n;
           return (
@@ -121,7 +118,8 @@ export default function EditPage() {
               <textarea name={`m${n}_review`} value={(formData as any)[`m${n}_review`]} onChange={handleChange} disabled={!isMeOrAdmin} className="w-full bg-gray-50 p-4 rounded-2xl h-24 mb-3 outline-none disabled:bg-gray-100" placeholder="감상평" />
               <div className="grid grid-cols-2 gap-4">
                 <input name={`m${n}_rating`} type="number" step="0.5" value={(formData as any)[`m${n}_rating`]} onChange={handleChange} disabled={!isMeOrAdmin} className="bg-gray-50 p-4 rounded-2xl font-black disabled:bg-gray-100" placeholder="평점" />
-                <input name={`m${n}_date`} type="text" value={(formData as any)[`m${n}_date`]} onChange={handleChange} disabled={!isMeOrAdmin} className="bg-gray-50 p-4 rounded-2xl disabled:bg-gray-100" placeholder="MM.DD" />
+                {/* ★ 완료일 형식 힌트 적용 ★ */}
+                <input name={`m${n}_date`} type="text" value={(formData as any)[`m${n}_date`]} onChange={handleChange} disabled={!isMeOrAdmin} className="bg-gray-50 p-4 rounded-2xl disabled:bg-gray-100" placeholder="YYYY_MM_DD (완료일)" />
               </div>
             </div>
           );
