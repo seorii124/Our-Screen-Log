@@ -37,7 +37,7 @@ export default function Home() {
   return (
     <div className="max-w-7xl mx-auto p-10 min-h-screen pb-32">
       <header className="mb-14">
-        <h1 className="text-5xl font-black text-white tracking-tighter mb-3 italic">Archive Content</h1>
+        <h1 className="text-5xl font-black text-neutral-900 tracking-tighter mb-3 italic">Archive Content</h1>
         <p className="text-neutral-500 font-bold tracking-[0.3em] text-[10px] uppercase">Curated by Team INFP Collector</p>
       </header>
 
