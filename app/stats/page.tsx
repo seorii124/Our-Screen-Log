@@ -1,92 +1,134 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-
-type StatData = {
-  month: string;
-  avgRating: number;
-  moviesCount: number;
-  dramasCount: number;
-};
+import { useEffect, useState } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell
+} from 'recharts'
 
 export default function StatsPage() {
-  const [data, setData] = useState<StatData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState<any[]>([])
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   useEffect(() => {
-    const fetchData = async () => {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+    async function fetchStats() {
+      const { data, error } = await supabase.from('works').select('viewing_period, average_rating')
+      
+      if (error || !data) return
 
-      // 관리자님의 원본 테이블인 'works' 사용
-      const { data: works, error } = await supabase
-        .from("works")
-        .select("*")
-        .order("created_at", { ascending: true });
+      // 1. 데이터 파싱 및 그룹화 로직
+      const groups: { [key: string]: { sum: number; count: number } } = {}
 
-      if (error) {
-        console.error(error);
-        setLoading(false);
-        return;
-      }
-
-      // 생성일(created_at) 기준으로 월별 그룹화 처리
-      const grouped = works.reduce((acc: any, curr) => {
-        const month = curr.created_at.substring(0, 7);
-        if (!acc[month]) {
-          acc[month] = { month, ratings: [], movies: 0, dramas: 0 };
-        }
+      data.forEach((work) => {
+        // '25년 9월' -> '2025-09' 형태로 변환
+        const period = work.viewing_period // 예: "25년 9월"
+        const match = period.match(/(\d+)년\s*(\d+)월/)
         
-        acc[month].ratings.push(curr.average_rating);
-        if (curr.category.toLowerCase().includes('movie') || curr.category === '영화') {
-          acc[month].movies++;
-        } else {
-          acc[month].dramas++;
+        if (match) {
+          const year = `20${match[1]}`
+          const month = match[2].padStart(2, '0')
+          const key = `${year}-${month}`
+
+          if (!groups[key]) groups[key] = { sum: 0, count: 0 }
+          groups[key].sum += work.average_rating || 0
+          groups[key].count += 1
         }
-        return acc;
-      }, {});
+      })
 
-      const chartData: StatData[] = Object.values(grouped).map((item: any) => ({
-        month: item.month,
-        avgRating: Number((item.ratings.reduce((a: number, b: number) => a + b, 0) / item.ratings.length).toFixed(1)),
-        moviesCount: item.movies,
-        dramasCount: item.dramas,
-      }));
+      // 2. 차트 데이터 배열로 변환 및 시간순 정렬
+      const formattedData = Object.keys(groups)
+        .sort() // 2025-09, 2025-10... 순서로 정렬
+        .map((key) => ({
+          month: key,
+          average: Number((groups[key].sum / groups[key].count).toFixed(1)),
+          count: groups[key].count
+        }))
 
-      setData(chartData);
-      setLoading(false);
-    };
+      setChartData(formattedData)
+    }
 
-    fetchData();
-  }, []);
-
-  if (loading) return <div className="text-center py-20 text-neutral-500 font-bold">데이터를 불러오는 중입니다...</div>;
+    fetchStats()
+  }, [supabase])
 
   return (
-    <div className="max-w-6xl mx-auto space-y-12 py-8">
-      <h2 className="text-3xl font-black tracking-tight italic text-white">Archive Statistics</h2>
-      
-      <div className="bg-neutral-900 border border-neutral-800 rounded-[2rem] p-8 shadow-sm">
-        <h3 className="text-xl font-bold mb-8 text-neutral-300">월별 평균 평점 추이</h3>
-        <div className="overflow-x-auto pb-4">
-          <div style={{ minWidth: "800px", height: "400px" }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                <XAxis dataKey="month" stroke="#888" tick={{ fill: '#888', fontSize: 12, fontWeight: 'bold' }} />
-                <YAxis stroke="#888" tick={{ fill: '#888' }} domain={[0, 5]} />
-                <Tooltip cursor={{ fill: '#2a2a2a' }} contentStyle={{ backgroundColor: '#171717', border: 'none', borderRadius: '12px', color: '#fff', fontWeight: 'bold' }} />
-                <Legend wrapperStyle={{ paddingTop: '20px', fontWeight: 'bold' }} />
-                <Bar dataKey="avgRating" name="월별 평균 평점" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+    <div className="max-w-6xl mx-auto p-10 min-h-screen text-white">
+      <header className="mb-12">
+        <h1 className="text-4xl font-black italic tracking-tighter mb-2 text-white">Watching Analysis</h1>
+        <p className="text-neutral-500 font-bold text-xs uppercase tracking-[0.2em]">시간 흐름에 따른 평점 추이</p>
+      </header>
+
+      {/* 메인 차트 카드 */}
+      <section className="bg-black border border-neutral-800 p-10 rounded-[2.5rem] shadow-2xl">
+        <div className="flex justify-between items-center mb-10">
+          <h2 className="text-xl font-bold">월별 평균 평점 추이</h2>
+          <div className="flex gap-4 text-[10px] font-black text-neutral-500 uppercase">
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 bg-blue-600 rounded-full"></span> 평균 평점</div>
           </div>
+        </div>
+
+        <div className="h-[400px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} />
+              <XAxis 
+                dataKey="month" 
+                stroke="#525252" 
+                fontSize={12} 
+                tickLine={false} 
+                axisLine={false} 
+                dy={10}
+              />
+              <YAxis 
+                stroke="#525252" 
+                fontSize={12} 
+                tickLine={false} 
+                axisLine={false} 
+                domain={[0, 5]}
+              />
+              <Tooltip 
+                cursor={{ fill: '#171717' }}
+                contentStyle={{ backgroundColor: '#000', border: '1px solid #262626', borderRadius: '12px' }}
+                itemStyle={{ color: '#2563eb', fontWeight: 'bold' }}
+              />
+              <Bar dataKey="average" radius={[6, 6, 0, 0]} barSize={40}>
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.average >= 4 ? '#2563eb' : '#3b82f6'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* 하단 상세 통계 그리드 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+        <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-3xl">
+          <p className="text-xs font-bold text-neutral-500 uppercase mb-2">총 기록 기간</p>
+          <p className="text-2xl font-black">{chartData.length}개월</p>
+        </div>
+        <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-3xl">
+          <p className="text-xs font-bold text-neutral-500 uppercase mb-2">전체 평균 평점</p>
+          <p className="text-2xl font-black text-blue-500">
+            {(chartData.reduce((acc, cur) => acc + cur.average, 0) / chartData.length || 0).toFixed(1)}
+          </p>
+        </div>
+        <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-3xl">
+          <p className="text-xs font-bold text-neutral-500 uppercase mb-2">가장 많이 본 달</p>
+          <p className="text-2xl font-black text-emerald-500">
+            {chartData.length > 0 ? [...chartData].sort((a, b) => b.count - a.count)[0].month : '-'}
+          </p>
         </div>
       </div>
     </div>
-  );
+  )
 }
