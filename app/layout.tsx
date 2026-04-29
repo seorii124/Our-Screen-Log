@@ -66,7 +66,7 @@ export default async function RootLayout({
             </Link>
             
             <div className="hidden md:flex items-center gap-8 text-sm font-bold text-neutral-400">
-              {/* PM 요구사항 반영: '배우', '위시리스트' 메뉴 추가 */}
+              {/* PM 요구사항 반영: '배우', '보고싶어요'메뉴추가*/}
               <Link href="/stats" className="hover:text-white transition">통계</Link>
               <Link href="/scenes" className="hover:text-white transition">명장면</Link>
               <Link href="/lines" className="hover:text-white transition">명대사</Link>
