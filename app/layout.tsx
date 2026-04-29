@@ -71,7 +71,7 @@ export default async function RootLayout({
               <Link href="/scenes" className="hover:text-white transition">명장면</Link>
               <Link href="/lines" className="hover:text-white transition">명대사</Link>
               <Link href="/actors" className="hover:text-white transition">배우</Link>
-              <Link href="/wishlist" className="hover:text-white transition">위시리스트</Link>
+              <Link href="/wishlist" className="hover:text-white transition">보고싶어요</Link>
             </div>
           </div>
           
