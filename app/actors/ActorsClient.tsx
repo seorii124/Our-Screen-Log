@@ -13,15 +13,15 @@ type Props = {
   initialActors: Actor[];
   deleteActor: (id: string) => Promise<void>;
   saveActor: (formData: FormData, id?: string) => Promise<void>;
+  isLoggedIn: boolean; // [수정된 부분] 로그인 상태 프롭스 추가
 };
 
-export default function ActorsClient({ initialActors, deleteActor, saveActor }: Props) {
+export default function ActorsClient({ initialActors, deleteActor, saveActor, isLoggedIn }: Props) {
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingActor, setEditingActor] = useState<Actor | null>(null);
 
-  // 삭제 핸들러 (useTransition 적용)
   const handleDelete = (id: string) => {
     if (!confirm("정말 삭제하시겠습니까?")) return;
     setDeletingId(id);
@@ -31,13 +31,11 @@ export default function ActorsClient({ initialActors, deleteActor, saveActor }: 
     });
   };
 
-  // 모달 열기 (수정일 경우 데이터 주입)
   const openModal = (actor?: Actor) => {
     setEditingActor(actor || null);
     setIsModalOpen(true);
   };
 
-  // 폼 제출 핸들러 (useTransition 적용)
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -51,12 +49,15 @@ export default function ActorsClient({ initialActors, deleteActor, saveActor }: 
     <>
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-black italic">Actors</h1>
-        <button 
-          onClick={() => openModal()} 
-          className="bg-white text-black px-4 py-2 rounded-full font-bold hover:bg-neutral-200 transition text-sm md:text-base"
-        >
-          + NEW ACTOR
-        </button>
+        {/* [수정된 부분] 로그인한 사용자에게만 등록 버튼 노출 */}
+        {isLoggedIn && (
+          <button 
+            onClick={() => openModal()} 
+            className="bg-white text-black px-4 py-2 rounded-full font-bold hover:bg-neutral-200 transition text-sm md:text-base"
+          >
+            + NEW ACTOR
+          </button>
+        )}
       </div>
 
       {initialActors.length === 0 ? (
@@ -66,10 +67,8 @@ export default function ActorsClient({ initialActors, deleteActor, saveActor }: 
           {initialActors.map((actor) => (
             <div 
               key={actor.id} 
-              // 삭제 중일 때 pointer-events-none 및 투명도 적용
               className={`relative group bg-neutral-800 rounded-xl overflow-hidden transition ${deletingId === actor.id ? 'opacity-50 pointer-events-none' : ''}`}
             >
-              {/* 이미지 영역 */}
               <div className="h-56 md:h-72 bg-neutral-900 relative">
                 {actor.profile_image_url ? (
                   <img src={actor.profile_image_url} alt={actor.name} className="w-full h-full object-cover" />
@@ -77,24 +76,25 @@ export default function ActorsClient({ initialActors, deleteActor, saveActor }: 
                   <div className="w-full h-full flex items-center justify-center text-neutral-700 font-bold">NO IMAGE</div>
                 )}
                 
-                {/* Hover Overlay Buttons (PM님 지시사항 적용) */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
-                  <button 
-                    onClick={() => openModal(actor)}
-                    className="bg-white/20 hover:bg-white/40 text-white px-4 py-2 rounded-full font-bold transition text-sm"
-                  >
-                    수정
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(actor.id)}
-                    className="bg-rose-500/50 hover:bg-rose-500 text-white px-4 py-2 rounded-full font-bold transition text-sm"
-                  >
-                    {deletingId === actor.id ? '삭제중...' : '삭제'}
-                  </button>
-                </div>
+                {/* [수정된 부분] 로그인한 사용자에게만 수정/삭제 오버레이 노출 */}
+                {isLoggedIn && (
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
+                    <button 
+                      onClick={() => openModal(actor)}
+                      className="bg-white/20 hover:bg-white/40 text-white px-4 py-2 rounded-full font-bold transition text-sm"
+                    >
+                      수정
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(actor.id)}
+                      className="bg-rose-500/50 hover:bg-rose-500 text-white px-4 py-2 rounded-full font-bold transition text-sm"
+                    >
+                      {deletingId === actor.id ? '삭제중...' : '삭제'}
+                    </button>
+                  </div>
+                )}
               </div>
               
-              {/* 텍스트 영역 */}
               <div className="p-4">
                 <h3 className="font-bold text-lg text-white">{actor.name}</h3>
                 {actor.description && <p className="text-xs text-neutral-400 mt-1 line-clamp-2">{actor.description}</p>}
@@ -104,8 +104,7 @@ export default function ActorsClient({ initialActors, deleteActor, saveActor }: 
         </div>
       )}
 
-      {/* 등록/수정 모달 폼 */}
-      {isModalOpen && (
+      {isModalOpen && isLoggedIn && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-xl w-full max-w-md relative">
             <h2 className="text-xl font-black mb-6 italic">{editingActor ? "EDIT ACTOR" : "NEW ACTOR"}</h2>

@@ -11,6 +11,10 @@ export default async function ActorsPage() {
     { cookies: { get(name: string) { return cookieStore.get(name)?.value; } } }
   );
 
+  // [수정된 부분] 현재 로그인한 유저 정보 확인
+  const { data: { user } } = await supabase.auth.getUser();
+  const isLoggedIn = !!user; // 유저가 있으면 true, 없으면 false
+
   // 1. 데이터 패칭
   const { data: actors } = await supabase
     .from("actors")
@@ -60,6 +64,7 @@ export default async function ActorsPage() {
         initialActors={actors || []} 
         deleteActor={deleteActor} 
         saveActor={saveActor} 
+        isLoggedIn={isLoggedIn} // 클라이언트로 로그인 상태 전달
       />
     </div>
   );
