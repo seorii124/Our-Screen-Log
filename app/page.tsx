@@ -1,5 +1,8 @@
 'use client'
 
+// [추가된 도어락] Next.js가 화면을 강제로 캐싱(기억)해서 비로그인 유저에게 오작동을 일으키는 것을 원천 차단합니다.
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
