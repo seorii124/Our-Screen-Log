@@ -110,7 +110,7 @@ export default function ScenesPage() {
     <div className="max-w-7xl mx-auto p-10 min-h-screen pb-32">
       <header className="mb-14 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6">
         <div>
-          <h1 className="text-5xl font-black text-neutral-900 tracking-tighter mb-3 italic">Famous Scenes</h1>
+          <h1 className="text-5xl font-black text-neutral-900 tracking-tighter mb-3 italic">Memorable Lines</h1>
           <p className="text-neutral-500 font-bold tracking-[0.3em] text-[10px] uppercase">Curated by Team INFP Collector</p>
         </div>
         {isLoggedIn && (
