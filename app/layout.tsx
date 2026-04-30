@@ -17,24 +17,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // 1. 쿠키 저장소 가져오기 (비동기 처리 호환성 확보)
-  const cookieStore = cookies();
-  
-  // 2. Supabase 클라이언트 초기화 (가장 안전한 방식)
+  const cookieStore = await cookies(); // ✅ await 추가
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get(name: string) {
-          // @ts-ignore (버전 호환성을 위해 무시)
           return cookieStore.get(name)?.value;
         },
       },
     }
   );
 
-  // 3. 유저 정보 가져오기 (에러가 나도 페이지는 뜨도록 처리)
   const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
 
   return (

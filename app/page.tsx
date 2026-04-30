@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '../src/lib/supabase/client' // ← 변경
+import { createClient } from '../src/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -17,14 +17,17 @@ interface Work {
 export default function Home() {
   const [works, setWorks] = useState<Work[]>([])
   const [sortType, setSortType] = useState('latest')
-  const [user, setUser] = useState<any>(undefined) // ← null → undefined (로딩 중 구분)
+  const [user, setUser] = useState<any>(undefined)
   const router = useRouter()
-  const supabase = createClient() // ← 변경
+  const supabase = createClient()
 
   useEffect(() => {
     async function fetchData() {
       const { data: { user } } = await supabase.auth.getUser()
-      setUser(user) // 로그인 → user 객체, 비로그인 → null
+      setUser(user)
+
+      console.log('user:', user)
+      console.log('url:', process.env.NEXT_PUBLIC_SUPABASE_URL)
 
       let query = supabase.from('works').select('*')
       if (sortType === 'latest') query = query.order('id', { ascending: false })
@@ -44,10 +47,6 @@ export default function Home() {
           <h1 className="text-5xl font-black text-neutral-900 tracking-tighter mb-3 italic">Archive Content</h1>
           <p className="text-neutral-500 font-bold tracking-[0.3em] text-[10px] uppercase">Curated by Team INFP Collector</p>
         </div>
-
-        {/* user가 undefined면 아직 확인 중 → 버튼 안 보임 */}
-        {/* user가 null이면 비로그인 → 버튼 안 보임 */}
-        {/* user가 객체면 로그인 → 버튼 보임 */}
         {user && (
           <Link
             href="/admin"
