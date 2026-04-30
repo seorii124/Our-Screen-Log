@@ -24,6 +24,9 @@ export async function GET(request: Request) {
   )
 
   await supabase.auth.signOut()
+
+  const referer = request.headers.get('referer')
+  const redirectTo = referer ?? '/'
   
-  return NextResponse.redirect(new URL('/', request.url))
+  return NextResponse.redirect(new URL(redirectTo, request.url))
 }
