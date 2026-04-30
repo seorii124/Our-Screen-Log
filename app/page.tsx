@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
+import { createClient } from '../src/lib/supabase/client' // ← 변경
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -17,17 +17,15 @@ interface Work {
 export default function Home() {
   const [works, setWorks] = useState<Work[]>([])
   const [sortType, setSortType] = useState('latest')
-  const [user, setUser] = useState<any>(null) // 로그인 유저 상태 추가
+  const [user, setUser] = useState<any>(undefined) // ← null → undefined (로딩 중 구분)
   const router = useRouter()
-  const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  const supabase = createClient() // ← 변경
 
   useEffect(() => {
     async function fetchData() {
-      // 1. 현재 로그인한 유저 확인
       const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+      setUser(user) // 로그인 → user 객체, 비로그인 → null
 
-      // 2. 작품 데이터 불러오기
       let query = supabase.from('works').select('*')
       if (sortType === 'latest') query = query.order('id', { ascending: false })
       else if (sortType === 'high') query = query.order('average_rating', { ascending: false })
@@ -37,7 +35,7 @@ export default function Home() {
       if (data) setWorks(data as Work[])
     }
     fetchData()
-  }, [sortType, supabase])
+  }, [sortType])
 
   return (
     <div className="max-w-7xl mx-auto p-10 min-h-screen pb-32">
@@ -46,11 +44,13 @@ export default function Home() {
           <h1 className="text-5xl font-black text-neutral-900 tracking-tighter mb-3 italic">Archive Content</h1>
           <p className="text-neutral-500 font-bold tracking-[0.3em] text-[10px] uppercase">Curated by Team INFP Collector</p>
         </div>
-        
-        {/* 로그인한 사용자(멤버/관리자)에게만 작품 추가 버튼 표시 */}
+
+        {/* user가 undefined면 아직 확인 중 → 버튼 안 보임 */}
+        {/* user가 null이면 비로그인 → 버튼 안 보임 */}
+        {/* user가 객체면 로그인 → 버튼 보임 */}
         {user && (
-          <Link 
-            href="/admin" 
+          <Link
+            href="/admin"
             className="inline-block bg-black text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl text-center"
           >
             + New Record
@@ -61,9 +61,9 @@ export default function Home() {
       <div className="flex justify-between items-end mb-10 border-b border-neutral-200 pb-8">
         <div className="flex gap-8">
           {['latest', 'high', 'low'].map((t) => (
-            <button 
-              key={t} 
-              onClick={() => setSortType(t)} 
+            <button
+              key={t}
+              onClick={() => setSortType(t)}
               className={`text-xs font-black uppercase tracking-widest transition-all relative ${
                 sortType === t ? 'text-blue-600' : 'text-neutral-400 hover:text-black'
               }`}

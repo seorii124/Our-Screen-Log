@@ -29,12 +29,16 @@ function AdminForm() {
     checkUser();
   }, [searchParams]);
 
+  // ✅ 여기만 변경
   async function checkUser() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push('/login'); return; }
-    setIsLoggedIn(true);
-    setIsAdmin(user.user_metadata?.role === 'admin');
-    setMyMemberNum(Number(user.user_metadata?.member) || 0);
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (!user || error) {
+      router.replace('/login')
+      return
+    }
+    setIsLoggedIn(true)
+    setIsAdmin(user.user_metadata?.role === 'admin')
+    setMyMemberNum(Number(user.user_metadata?.member) || 0)
   }
 
   async function fetchOriginalData(id: string) {
