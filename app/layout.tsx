@@ -4,8 +4,8 @@ import "./globals.css";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import Link from "next/link";
+import AuthListener from "./components/AuthListener"; // ✅ 리스너 임포트
 
-// 🚨 [핵심 패치] Vercel CDN이 비로그인 상태를 정적으로 캐싱하는 것을 원천 차단
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -47,6 +47,9 @@ export default async function RootLayout({
   return (
     <html lang="ko">
       <body className={`${inter.className} bg-neutral-900 text-neutral-100 min-h-screen flex flex-col overflow-x-hidden`}>
+        {/* ✅ 백그라운드 세션 동기화 컴포넌트 실행 */}
+        <AuthListener />
+        
         <nav className="flex justify-between items-center px-4 md:px-10 py-4 border-b border-neutral-800 bg-black sticky top-0 z-50 w-full min-h-[70px]">
           <div className="flex items-center justify-between w-full md:w-auto gap-4 md:gap-12">
             <Link href="/" className="text-lg md:text-2xl font-black tracking-tighter text-white italic flex items-center gap-2">
