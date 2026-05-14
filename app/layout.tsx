@@ -43,22 +43,32 @@ export default async function RootLayout({
             </Link>
             
             <div className="flex items-center gap-3 md:gap-8 text-[11px] md:text-sm font-bold text-neutral-400">
-              <Link href="/stats" className="hover:text-white transition">통계</Link>
+              <Link href="/actors" className="hover:text-white transition">배우</Link>
+              <Link href="/ost" className="hover:text-white transition">OST</Link>
               <Link href="/scenes" className="hover:text-white transition">명장면</Link>
               <Link href="/lines" className="hover:text-white transition">명대사</Link>
-              <Link href="/actors" className="hover:text-white transition">배우</Link>
+              <Link href="/stats" className="hover:text-white transition">통계</Link>
               <Link href="/wishlist" className="hover:text-white transition">보고싶어요</Link>
             </div>
           </div>
           
           <div className="hidden md:flex items-center gap-6 border-l border-neutral-800 pl-6">
             {user ? (
-              <div className="flex items-center gap-4">
-                <span className="text-xs text-neutral-500">{user.email}</span>
-                <Link href="/logout" className="text-red-400 text-sm font-bold">Logout</Link>
+              <div className="flex items-center gap-5">
+                <Link href="/mypage" className="text-sm font-bold text-white hover:text-neutral-300 transition cursor-pointer">
+                  My Page
+                </Link>
+                <Link href="/register" className="text-sm font-bold text-green-400 hover:text-green-300 transition cursor-pointer">
+                  등록하기
+                </Link>
+                <Link href="/logout" className="text-red-400 text-sm font-bold cursor-pointer">
+                  Logout
+                </Link>
               </div>
             ) : (
-              <Link href="/login" className="text-sm font-bold text-blue-500">Admin Login</Link>
+              <Link href="/login" className="text-sm font-bold text-blue-500 cursor-pointer">
+                Admin Login
+              </Link>
             )}
           </div>
         </nav>
