@@ -28,17 +28,24 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const pathname = request.nextUrl.pathname
 
-  // 🚪 쇼윈도(Public) 예외 처리: 작품 상세(/works/...)는 무조건 통과
+  // 🚪 쇼윈도(Public) 예외 처리
   if (pathname.startsWith('/works/') && !pathname.endsWith('/edit')) {
     return supabaseResponse
   }
 
-  // 🚩 보호 경로 체크 (경로 중간에 'admin' 등이 포함되어도 잡아냄)
+  // 🚩 보호 경로 체크
   const isProtected = PROTECTED_PATHS.some(path => pathname.includes(path))
 
   if (isProtected && !user) {
     console.log('🚨 [Proxy] Unauthorized access to:', pathname)
-    return NextResponse.redirect(new URL('/login', request.url))
+    
+    // [최적화] 리디렉션 응답을 생성하고, supabaseResponse에 담긴 갱신된 쿠키를 무조건 복사해서 전달
+    const redirectResponse = NextResponse.redirect(new URL('/login', request.url))
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+    })
+    
+    return redirectResponse
   }
 
   return supabaseResponse
