@@ -17,18 +17,28 @@ interface Work {
 export default function Home() {
   const [works, setWorks] = useState<Work[]>([])
   const [sortType, setSortType] = useState('latest')
-  const [user, setUser] = useState<any>(undefined)
+  const [user, setUser] = useState<any>(null) // 초기값을 null로 명확히 지정
   const router = useRouter()
   const supabase = createClient()
 
+  // 1. 유저 세션 전용 useEffect (쇼윈도 관리자 권한 확인 및 실시간 동기화)
   useEffect(() => {
-    async function fetchData() {
-      const { data: { user } } = await supabase.auth.getUser()
+    // 마운트 시 즉시 유저 확인
+    supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user)
+    })
 
-      console.log('user:', user)
-      console.log('url:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+    // 로그인/로그아웃 상태가 변하면 즉시 버튼 UI 업데이트 (새로고침 불필요)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null)
+    })
 
+    return () => subscription.unsubscribe()
+  }, [supabase.auth])
+
+  // 2. 작품 데이터 패치 전용 useEffect (정렬 변경 시 진열장만 업데이트)
+  useEffect(() => {
+    async function fetchWorks() {
       let query = supabase.from('works').select('*')
       if (sortType === 'latest') query = query.order('id', { ascending: false })
       else if (sortType === 'high') query = query.order('average_rating', { ascending: false })
@@ -37,8 +47,8 @@ export default function Home() {
       const { data } = await query
       if (data) setWorks(data as Work[])
     }
-    fetchData()
-  }, [sortType])
+    fetchWorks()
+  }, [sortType, supabase])
 
   return (
     <div className="max-w-7xl mx-auto p-10 min-h-screen pb-32">
@@ -47,6 +57,7 @@ export default function Home() {
           <h1 className="text-5xl font-black text-neutral-900 tracking-tighter mb-3 italic">Archive Content</h1>
           <p className="text-neutral-500 font-bold tracking-[0.3em] text-[10px] uppercase">Curated by Team INFP Collector</p>
         </div>
+        {/* 관리자/직원에게만 진열장 수정 버튼 노출 */}
         {user && (
           <Link
             href="/admin"

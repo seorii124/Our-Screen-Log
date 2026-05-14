@@ -1,10 +1,11 @@
+// proxy.ts (Next.js 16 표준 규격)
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// 로그인 필요한 경로
-const PROTECTED_ROUTES = ['/admin', '/my-log']
+// 🔐 직원(관리자)만 들어갈 수 있는 금지 구역
+const PROTECTED_PATHS = ['/admin', '/my-log', '/write', '/edit']
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -27,20 +28,22 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const pathname = request.nextUrl.pathname
 
-  // 보호된 경로 → 비로그인 시 /login 리다이렉트
-  const isProtected = PROTECTED_ROUTES.some(route => pathname.startsWith(route))
-  if (isProtected && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // 🚪 쇼윈도(Public) 예외 처리: 작품 상세(/works/...)는 무조건 통과
+  if (pathname.startsWith('/works/') && !pathname.endsWith('/edit')) {
+    return supabaseResponse
   }
 
-  // 이미 로그인 상태에서 /login 접근 → 홈으로
-  if (pathname === '/login' && user) {
-    return NextResponse.redirect(new URL('/', request.url))
+  // 🚩 보호 경로 체크 (경로 중간에 'admin' 등이 포함되어도 잡아냄)
+  const isProtected = PROTECTED_PATHS.some(path => pathname.includes(path))
+
+  if (isProtected && !user) {
+    console.log('🚨 [Proxy] Unauthorized access to:', pathname)
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/my-log/:path*', '/login'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

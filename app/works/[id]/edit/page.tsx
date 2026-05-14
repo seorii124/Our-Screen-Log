@@ -10,11 +10,11 @@ export default function EditPage() {
     m1_review: '', m1_rating: 0, m1_date: '',
     m2_review: '', m2_rating: 0, m2_date: '',
     m3_review: '', m3_rating: 0, m3_date: '',
-    poster_url: '' 
+    poster_url: ''
   });
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  
+ 
   const [isAdmin, setIsAdmin] = useState(false);
   const [myMemberNum, setMyMemberNum] = useState<number>(0);
 
@@ -31,15 +31,15 @@ export default function EditPage() {
   async function checkUser() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user && user.email) {
-      if (user.email === 'seorii40@gmail.com') { 
-        setMyMemberNum(1); 
-        setIsAdmin(true); 
+      if (user.email === 'seorii40@gmail.com') {
+        setMyMemberNum(1);
+        setIsAdmin(true);
       }
-      else if (user.email === 'onlyziyu76@gmail.com') { 
-        setMyMemberNum(2); 
+      else if (user.email === 'onlyziyu76@gmail.com') {
+        setMyMemberNum(2);
       }
-      else if (user.email === 'mooddnnaa@gmail.com') { 
-        setMyMemberNum(3); 
+      else if (user.email === 'mooddnnaa@gmail.com') {
+        setMyMemberNum(3);
       }
     }
   }
@@ -82,12 +82,12 @@ export default function EditPage() {
       m1_rating: Number(formData.m1_rating), m2_rating: Number(formData.m2_rating), m3_rating: Number(formData.m3_rating),
       poster_url: finalImageUrl,
       average_rating: (Number(formData.m1_rating) + Number(formData.m2_rating) + Number(formData.m3_rating)) / 3
-    }).eq('id', editId); 
+    }).eq('id', editId);
 
     setIsUploading(false);
-    if (!error) { 
-      alert('수정 성공!'); 
-      router.push(`/works/${editId}`); 
+    if (!error) {
+      alert('수정 성공!');
+      router.push(`/works/${editId}`);
       router.refresh();
     } else { alert('에러: ' + error.message); }
   };
@@ -96,7 +96,7 @@ export default function EditPage() {
     <div className="max-w-2xl mx-auto py-12 px-4 min-h-screen">
       <h1 className="text-3xl font-black mb-8 italic text-white">Edit Record ✍️</h1>
       <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl text-black">
-        
+       
         <div>
           <label className="block text-[10px] font-black uppercase mb-2 ml-1 text-gray-400">Title</label>
           <input name="title" type="text" required value={formData.title} onChange={handleChange} disabled={!isAdmin} className="w-full bg-gray-50 p-4 rounded-2xl outline-none disabled:opacity-50" />
