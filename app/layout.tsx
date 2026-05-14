@@ -5,6 +5,10 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import Link from "next/link";
 
+// 🚨 [핵심 패치] Vercel CDN이 비로그인 상태를 정적으로 캐싱하는 것을 원천 차단
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -17,15 +21,22 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies(); // ✅ await 추가
+  const cookieStore = await cookies();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {}
         },
       },
     }
@@ -55,7 +66,6 @@ export default async function RootLayout({
           <div className="hidden md:flex items-center gap-6 border-l border-neutral-800 pl-6">
             {user ? (
               <div className="flex items-center gap-5">
-                {/* 🚨 경로를 /my-log 로 수정하고 등록하기 버튼은 삭제했습니다. */}
                 <Link href="/my-log" className="text-sm font-bold text-white hover:text-neutral-300 transition cursor-pointer">
                   My Page
                 </Link>
