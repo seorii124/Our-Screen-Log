@@ -55,11 +55,9 @@ export default async function RootLayout({
           <div className="hidden md:flex items-center gap-6 border-l border-neutral-800 pl-6">
             {user ? (
               <div className="flex items-center gap-5">
-                <Link href="/mypage" className="text-sm font-bold text-white hover:text-neutral-300 transition cursor-pointer">
+                {/* 🚨 경로를 /my-log 로 수정하고 등록하기 버튼은 삭제했습니다. */}
+                <Link href="/my-log" className="text-sm font-bold text-white hover:text-neutral-300 transition cursor-pointer">
                   My Page
-                </Link>
-                <Link href="/register" className="text-sm font-bold text-green-400 hover:text-green-300 transition cursor-pointer">
-                  등록하기
                 </Link>
                 <Link href="/logout" className="text-red-400 text-sm font-bold cursor-pointer">
                   Logout

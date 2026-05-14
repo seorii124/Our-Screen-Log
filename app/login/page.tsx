@@ -31,8 +31,11 @@ export default function LoginPage() {
       setError('로그인 정보가 올바르지 않습니다.')
       setLoading(false)
     } else {
-      router.push('/')
-      router.refresh()
+      // [최적화 포인트] 토큰이 쿠키에 안전하게 구워질 시간을 확보하기 위해
+      // router.push + router.refresh 대신 window.location.href 사용
+      // 이렇게 하면 브라우저가 완전히 새로운 페이지 요청을 서버로 보내며
+      // 구워진 쿠키를 100% 확실하게 서버로 전달하여 세션 튕김 현상을 방지합니다.
+      window.location.href = '/'
     }
   }
 

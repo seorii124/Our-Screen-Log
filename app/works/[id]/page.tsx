@@ -1,40 +1,37 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import Link from "next/link";
-// next/navigation의 useParams 대신 서버 컴포넌트 props로 params를 받습니다.
 
+// [최적화] Next.js 15 환경에 맞춰 params를 Promise로 받도록 수정
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export default async function WorkDetailPage({ params }: Props) {
-  const { id } = params;
+  // 🚨 여기서 반드시 await로 파라미터를 풀어줘야 화면이 하얗게 뻗지 않습니다.
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
+  
   const cookieStore = await cookies();
   
-  // 기존 클라이언트가 아닌 서버용 Supabase 인스턴스 생성
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { get(name: string) { return cookieStore.get(name)?.value; } } }
   );
 
-  // 1. 유저 상태 확인 (서버에서 즉시 확인하므로 로딩 딜레이 없음)
   const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
-
-  // 2. 작품 데이터 확인 (서버에서 즉시 패칭)
   const { data: work } = await supabase.from('works').select('*').eq('id', id).single();
 
-  if (!work) return <div className="p-10 text-white font-bold tracking-widest flex items-center justify-center min-h-[50vh]">LOADING...</div>;
+  if (!work) return <div className="p-10 text-white font-bold tracking-widest flex items-center justify-center min-h-[50vh]">작품을 찾을 수 없습니다.</div>;
 
   return (
     <div className="max-w-4xl mx-auto p-10 min-h-screen text-white">
-      {/* 🚨 클라이언트 전용인 history.back() 대신 Link로 목록 복귀 처리 (서버 컴포넌트 최적화) */}
       <Link href="/" className="mb-8 inline-block text-neutral-400 text-xs font-bold hover:text-white transition">
         ← 목록으로 돌아가기
       </Link>
       
       <div className="grid md:grid-cols-2 gap-12 mt-4">
-        {/* 노션 스타일의 카드형 포스터 뷰 (UI 최적화) */}
         <div className="bg-neutral-900 p-2 rounded-2xl shadow-2xl border border-neutral-800 self-start">
           <img src={work.poster_url} alt={work.title} className="w-full aspect-[2/3] object-cover rounded-xl" />
         </div>
@@ -57,7 +54,6 @@ export default async function WorkDetailPage({ params }: Props) {
             ))}
           </div>
           
-          {/* 서버 렌더링 시점에 바로 결정되므로 권한 깜빡임이나 튕김 현상 원천 차단 */}
           {user && (
             <Link href={`/works/${id}/edit`} className="mt-10 block w-full text-center py-4 bg-white text-black rounded-full font-black hover:bg-neutral-200 transition shadow-lg">
               내용 수정하기
