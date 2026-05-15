@@ -13,9 +13,14 @@ export async function deleteOst(id: string) {
       cookies: {
         getAll() { return actionCookieStore.getAll(); },
         setAll(cookiesToSet) {
-          try { cookiesToSet.forEach(({ name, value, options }) => actionCookieStore.set(name, value, options)); } catch {}
-        }
-      }
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              // 🚨 타입 충돌 무시 (as any 추가)
+              actionCookieStore.set(name, value, options as any)
+            );
+          } catch {}
+        },
+      },
     }
   );
   await actionSupabase.from("ost").delete().eq("id", id);
@@ -32,9 +37,13 @@ export async function saveOst(data: any) {
       cookies: {
         getAll() { return actionCookieStore.getAll(); },
         setAll(cookiesToSet) {
-          try { cookiesToSet.forEach(({ name, value, options }) => actionCookieStore.set(name, value, options)); } catch {}
-        }
-      }
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              actionCookieStore.set(name, value, options as any)
+            );
+          } catch {}
+        },
+      },
     }
   );
   const { error } = await actionSupabase.from("ost").insert([data]);
@@ -42,7 +51,6 @@ export async function saveOst(data: any) {
   revalidatePath("/ost");
 }
 
-// 🚨 [새 기능] 기존 OST 데이터 업데이트 액션
 export async function updateOst(id: string, data: any) {
   "use server";
   const actionCookieStore = await cookies();
@@ -53,9 +61,13 @@ export async function updateOst(id: string, data: any) {
       cookies: {
         getAll() { return actionCookieStore.getAll(); },
         setAll(cookiesToSet) {
-          try { cookiesToSet.forEach(({ name, value, options }) => actionCookieStore.set(name, value, options)); } catch {}
-        }
-      }
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              actionCookieStore.set(name, value, options as any)
+            );
+          } catch {}
+        },
+      },
     }
   );
   const { error } = await actionSupabase.from("ost").update(data).eq("id", id);
@@ -74,7 +86,7 @@ export default async function OstPage() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, options as any)
             );
           } catch {}
         },
@@ -90,10 +102,9 @@ export default async function OstPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  // media_title과 구형 movie_title 호환 유지
   const safeOsts = (osts || []).map((item: any) => ({
     ...item,
-    media_title: item.media_title || item.movie_title || "정보 없음"
+    media_title: item.media_title || item.movie_title || "제목 정보 없음"
   }));
 
   return (
