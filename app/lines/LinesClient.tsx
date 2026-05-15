@@ -84,78 +84,82 @@ export default function LinesClient({
 
   return (
     <div className="pb-20">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-12 border-b border-gray-100 pb-8 gap-6">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-10 border-b border-gray-100 pb-6 gap-4">
         <div>
-          <h1 className="text-4xl font-black text-black mb-2 tracking-tight uppercase">Lines</h1>
-          <p className="text-xs font-bold text-gray-400 tracking-widest uppercase">Memorable Movie & Drama Quotes</p>
+          <h1 className="text-3xl font-black text-black mb-1 uppercase tracking-tight">Lines</h1>
+          <p className="text-sm font-bold text-gray-400">Our Screen Log</p>
         </div>
         {isLoggedIn && (
           <button 
             onClick={() => { setIsEditing(!isEditing); setEditingId(null); setFormData({ work_id: '', work_title: '', content: '', source: '' }); }} 
-            className="bg-black text-white px-8 py-3.5 rounded-full font-bold shadow-lg hover:bg-gray-800 transition"
+            className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:bg-gray-800 transition"
           >
-            {isEditing ? "CLOSE" : "+ ADD LINE"}
+            {isEditing ? "닫기" : "+ 대사 등록"}
           </button>
         )}
       </div>
 
       {isEditing && (
-        <form onSubmit={handleSubmit} className="bg-white p-10 rounded-[32px] border border-gray-200 shadow-2xl mb-16 space-y-6">
-          <h2 className="text-xl font-black">{editingId ? "수정하기" : "새 대사 등록"}</h2>
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl border border-gray-200 shadow-lg mb-12 space-y-6">
+          <h2 className="text-lg font-black">{editingId ? "수정하기" : "새 대사 등록"}</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-              <label className="block text-[10px] font-black text-gray-400 mb-2 uppercase">Work Title</label>
-              <select required value={formData.work_id} onChange={handleWorkSelect} className="w-full bg-transparent text-black font-bold outline-none">
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">작품 선택</label>
+              <select required value={formData.work_id} onChange={handleWorkSelect} className="w-full bg-transparent text-black font-bold outline-none text-sm">
                 <option value="">작품을 선택하세요</option>
                 {works.map(w => <option key={w.id} value={w.id}>{w.title}</option>)}
               </select>
             </div>
-            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-              <label className="block text-[10px] font-black text-gray-400 mb-2 uppercase">Source / Time</label>
-              <input type="text" placeholder="예: 1화 32분, ep.3" value={formData.source} onChange={e => setFormData(prev => ({ ...prev, source: e.target.value }))} className="w-full bg-transparent text-black outline-none font-bold" />
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">출처 / 시간</label>
+              <input type="text" placeholder="예: 1화 32분, ep.3" value={formData.source} onChange={e => setFormData(prev => ({ ...prev, source: e.target.value }))} className="w-full bg-transparent text-black outline-none font-bold text-sm" />
             </div>
           </div>
-          <textarea required placeholder="기억에 남는 대사를 입력하세요" value={formData.content} onChange={e => setFormData(prev => ({ ...prev, content: e.target.value }))} rows={4} className="w-full border border-gray-200 bg-gray-50 p-6 rounded-3xl outline-none focus:border-black font-bold text-xl leading-relaxed"></textarea>
-          <button type="submit" disabled={loading} className="w-full bg-black text-white font-black py-4 rounded-2xl hover:bg-gray-800 transition shadow-md disabled:opacity-50">
-            {loading ? "SAVING..." : "SAVE ARCHIVE"}
+          <textarea required placeholder="기억에 남는 대사를 입력하세요" value={formData.content} onChange={e => setFormData(prev => ({ ...prev, content: e.target.value }))} rows={4} className="w-full border border-gray-200 bg-gray-50 p-5 rounded-xl outline-none focus:border-black font-medium text-base leading-relaxed"></textarea>
+          <button type="submit" disabled={loading} className="w-full bg-black text-white font-bold py-3.5 rounded-xl hover:bg-gray-800 transition shadow-sm disabled:opacity-50">
+            {loading ? "저장 중..." : "아카이브에 저장"}
           </button>
         </form>
       )}
 
-      <div className="space-y-10">
+      {/* 🚨 노션(Notion) 인용구 스타일 적용 (칸 사이즈 축소, 가독성 강화) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {initialLines.map(line => (
-          <div key={line.id} className="relative bg-white rounded-[40px] p-10 md:p-14 border border-gray-100 hover:border-gray-300 shadow-sm hover:shadow-xl transition-all duration-500 group overflow-hidden">
-            {/* 시각적 요소: 배경 따옴표 */}
-            <div className="absolute -top-4 left-6 text-[160px] font-serif text-gray-50 leading-none select-none -z-10 opacity-60">“</div>
-            
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-8">
-                <span className="bg-black text-white text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest">
+          <div key={line.id} className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-md transition-all group flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <span className="bg-gray-100 text-gray-800 text-xs font-bold px-3 py-1.5 rounded-md uppercase tracking-wider">
                   {line.work_title}
                 </span>
+                
                 {isLoggedIn && (
-                  <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => startEditing(line)} className="text-blue-500 text-xs font-bold hover:underline">Edit</button>
-                    <button onClick={async () => { if(confirm("삭제하시겠습니까?")) await deleteLine(line.id); window.location.reload(); }} className="text-gray-400 text-xs font-bold hover:text-red-500">Delete</button>
+                  <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => startEditing(line)} className="text-blue-500 text-xs font-bold hover:underline">수정</button>
+                    <button onClick={async () => { if(confirm("삭제하시겠습니까?")) await deleteLine(line.id); window.location.reload(); }} className="text-gray-400 text-xs font-bold hover:text-red-500">삭제</button>
                   </div>
                 )}
               </div>
 
-              {/* 🚨 가독성 최적화: 기울임 제거, 굵은 정자체 */}
-              <p className="text-2xl md:text-4xl font-black text-black leading-tight break-keep mb-8">
-                {line.content}
-              </p>
-
-              {line.source && (
-                <p className="text-sm text-gray-400 font-bold flex items-center gap-2">
-                  <span className="w-6 h-[2px] bg-gray-200"></span>
-                  {line.source}
+              {/* 노션식 인용선(왼쪽 테두리) 및 정갈한 텍스트 렌더링 */}
+              <div className="border-l-4 border-gray-300 pl-4 py-1 my-2">
+                <p className="text-lg font-medium text-gray-900 leading-relaxed break-keep">
+                  {line.content}
                 </p>
-              )}
+              </div>
             </div>
+
+            {line.source && (
+              <p className="text-xs font-bold text-gray-400 mt-5 text-right">
+                — {line.source}
+              </p>
+            )}
           </div>
         ))}
       </div>
+      
+      {initialLines.length === 0 && !isEditing && (
+        <div className="text-center text-gray-400 py-20 font-bold text-sm">등록된 명대사가 없습니다.</div>
+      )}
     </div>
   );
 }
