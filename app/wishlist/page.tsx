@@ -24,6 +24,18 @@ export async function saveWishlist(data: any) {
   revalidatePath("/wishlist");
 }
 
+// 🚨 [새 기능] 수정 액션 추가
+export async function updateWishlist(id: string, data: any) {
+  "use server";
+  const actionCookieStore = await cookies();
+  const actionSupabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    cookies: { getAll() { return actionCookieStore.getAll(); }, setAll(cookiesToSet) { try { cookiesToSet.forEach(({ name, value, options }) => actionCookieStore.set(name, value, options)); } catch {} } }
+  });
+  const { error } = await actionSupabase.from("wishlist").update(data).eq("id", id);
+  if (error) throw error;
+  revalidatePath("/wishlist");
+}
+
 export default async function WishlistPage() {
   const cookieStore = await cookies();
   const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
@@ -37,7 +49,7 @@ export default async function WishlistPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 md:p-12">
-      <WishlistClient initialWishlist={wishlist || []} deleteWishlist={deleteWishlist} saveWishlist={saveWishlist} isLoggedIn={isLoggedIn} />
+      <WishlistClient initialWishlist={wishlist || []} deleteWishlist={deleteWishlist} saveWishlist={saveWishlist} updateWishlist={updateWishlist} isLoggedIn={isLoggedIn} />
     </div>
   );
 }
