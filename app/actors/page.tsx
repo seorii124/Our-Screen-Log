@@ -3,69 +3,74 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import ActorsClient from "./ActorsClient";
 
+export async function deleteActor(id: string) {
+  "use server";
+  const actionCookieStore = await cookies();
+  const actionSupabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return actionCookieStore.getAll(); },
+        setAll(cookiesToSet) {
+          try { cookiesToSet.forEach(({ name, value, options }) => actionCookieStore.set(name, value, options)); } catch {}
+        }
+      }
+    }
+  );
+  await actionSupabase.from("actors").delete().eq("id", id);
+  revalidatePath("/actors");
+}
+
+export async function saveActor(data: any) {
+  "use server";
+  const actionCookieStore = await cookies();
+  const actionSupabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return actionCookieStore.getAll(); },
+        setAll(cookiesToSet) {
+          try { cookiesToSet.forEach(({ name, value, options }) => actionCookieStore.set(name, value, options)); } catch {}
+        }
+      }
+    }
+  );
+
+  const { error } = await actionSupabase.from("actors").insert([data]);
+  if (error) throw error;
+  revalidatePath("/actors");
+}
+
 export default async function ActorsPage() {
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { get(name: string) { return cookieStore.get(name)?.value; } } }
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll(); },
+        setAll(cookiesToSet) {
+          try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)); } catch {}
+        }
+      }
+    }
   );
 
-  // [최적화 포인트] 에러 발생 시 앱이 죽지 않도록 catch 예외 처리 추가
   const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
   const isLoggedIn = !!user;
 
-  // 1. 데이터 패칭
+  // 핀 고정된 항목을 먼저, 그 다음 최신순으로 정렬하여 가져옵니다.
   const { data: actors } = await supabase
     .from("actors")
     .select("*")
+    .order("is_pinned", { ascending: false })
     .order("created_at", { ascending: false });
 
-  // 2. 서버 액션: 삭제
-  async function deleteActor(id: string) {
-    "use server";
-    const actionCookieStore = await cookies();
-    const actionSupabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { get(name: string) { return actionCookieStore.get(name)?.value; } } }
-    );
-    await actionSupabase.from("actors").delete().eq("id", id);
-    revalidatePath("/actors");
-  }
-
-  // 3. 서버 액션: 등록 및 수정 (Upsert)
-  async function saveActor(formData: FormData, id?: string) {
-    "use server";
-    const actionCookieStore = await cookies();
-    const actionSupabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { get(name: string) { return actionCookieStore.get(name)?.value; } } }
-    );
-
-    const payload = {
-      name: formData.get("name") as string,
-      profile_image_url: formData.get("profile_image_url") as string,
-      description: formData.get("description") as string,
-    };
-
-    if (id) {
-      await actionSupabase.from("actors").update(payload).eq("id", id);
-    } else {
-      await actionSupabase.from("actors").insert([payload]);
-    }
-    revalidatePath("/actors");
-  }
-
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-10">
-      <ActorsClient 
-        initialActors={actors || []} 
-        deleteActor={deleteActor} 
-        saveActor={saveActor} 
-        isLoggedIn={isLoggedIn} 
-      />
+    <div className="max-w-6xl mx-auto p-6 md:p-12">
+      <ActorsClient initialActors={actors || []} deleteActor={deleteActor} saveActor={saveActor} isLoggedIn={isLoggedIn} />
     </div>
   );
 }
