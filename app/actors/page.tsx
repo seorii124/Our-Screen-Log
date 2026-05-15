@@ -37,8 +37,28 @@ export async function saveActor(data: any) {
       }
     }
   );
-
   const { error } = await actionSupabase.from("actors").insert([data]);
+  if (error) throw error;
+  revalidatePath("/actors");
+}
+
+// 🚨 [새 기능] 기존 배우 데이터 업데이트 액션
+export async function updateActor(id: string, data: any) {
+  "use server";
+  const actionCookieStore = await cookies();
+  const actionSupabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return actionCookieStore.getAll(); },
+        setAll(cookiesToSet) {
+          try { cookiesToSet.forEach(({ name, value, options }) => actionCookieStore.set(name, value, options)); } catch {}
+        }
+      }
+    }
+  );
+  const { error } = await actionSupabase.from("actors").update(data).eq("id", id);
   if (error) throw error;
   revalidatePath("/actors");
 }
@@ -61,7 +81,6 @@ export default async function ActorsPage() {
   const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
   const isLoggedIn = !!user;
 
-  // 핀 고정된 항목을 먼저, 그 다음 최신순으로 정렬하여 가져옵니다.
   const { data: actors } = await supabase
     .from("actors")
     .select("*")
@@ -70,7 +89,13 @@ export default async function ActorsPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 md:p-12">
-      <ActorsClient initialActors={actors || []} deleteActor={deleteActor} saveActor={saveActor} isLoggedIn={isLoggedIn} />
+      <ActorsClient 
+        initialActors={actors || []} 
+        deleteActor={deleteActor} 
+        saveActor={saveActor} 
+        updateActor={updateActor} 
+        isLoggedIn={isLoggedIn} 
+      />
     </div>
   );
 }

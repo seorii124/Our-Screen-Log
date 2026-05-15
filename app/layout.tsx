@@ -43,18 +43,17 @@ export default async function RootLayout({
 
   return (
     <html lang="ko">
-      {/* 배경을 흰색(bg-white), 글씨를 검정(text-black)으로 확정 */}
       <body className={`${inter.className} bg-white text-black min-h-screen flex flex-col overflow-x-hidden selection:bg-gray-200`}>
         <AuthListener />
         
-        {/* 네비게이션: 검정 배경 유지, 로고의 italic 클래스 완전 삭제 */}
-        <nav className="flex justify-between items-center px-6 md:px-12 py-5 bg-black sticky top-0 z-50 w-full">
-          <div className="flex items-center justify-between w-full md:w-auto gap-8">
-            <a href="/" className="text-xl font-bold tracking-normal text-white flex items-center gap-2">
+        <nav className="flex justify-between items-center px-4 md:px-10 py-4 border-b border-neutral-100 bg-black sticky top-0 z-50 w-full min-h-[70px]">
+          <div className="flex items-center justify-between w-full md:w-auto gap-4 md:gap-12">
+            {/* 🍿 아이콘 제거 및 깔끔한 폰트 적용 */}
+            <a href="/" className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center">
               OUR SCREEN LOG
             </a>
             
-            <div className="flex items-center gap-6 text-sm font-medium text-gray-400">
+            <div className="flex items-center gap-4 md:gap-10 text-[12px] md:text-sm font-bold text-gray-300">
               <a href="/actors" className="hover:text-white transition">배우</a>
               <a href="/ost" className="hover:text-white transition">OST</a>
               <a href="/scenes" className="hover:text-white transition">명장면</a>
@@ -64,19 +63,19 @@ export default async function RootLayout({
             </div>
           </div>
           
-          <div className="hidden md:flex items-center gap-6 pl-6">
+          <div className="hidden md:flex items-center gap-6 border-l border-neutral-800 pl-6">
             {user ? (
               <div className="flex items-center gap-5">
-                <a href="/my-log" className="text-sm font-medium text-gray-300 hover:text-white transition">
+                <a href="/my-log" className="text-sm font-bold text-white hover:text-gray-300 transition">
                   My Page
                 </a>
-                <a href="/logout" className="text-red-400 text-sm font-medium hover:text-red-300 transition">
+                <a href="/logout" className="text-red-400 text-sm font-bold hover:text-red-300 transition">
                   Logout
                 </a>
               </div>
             ) : (
-              <a href="/login" className="text-sm font-medium text-blue-400 hover:text-blue-300 transition">
-                Login
+              <a href="/login" className="text-sm font-bold text-blue-400 hover:text-blue-300 transition">
+                Admin Login
               </a>
             )}
           </div>
