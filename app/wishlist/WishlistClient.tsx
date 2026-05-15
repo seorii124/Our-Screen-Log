@@ -1,142 +1,69 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-type WishlistItem = {
+interface Wishlist {
   id: string;
   title: string;
-  poster_url: string;
-  expectation: string;
-};
+  reason: string;
+  is_watched: boolean;
+}
 
-type Props = {
-  initialData: WishlistItem[];
-  isLoggedIn: boolean;
-  saveWishlist: (formData: FormData, id?: string) => Promise<void>;
-  deleteWishlist: (id: string) => Promise<void>;
-};
+export default function WishlistClient({
+  initialWishlist, deleteWishlist, saveWishlist, isLoggedIn
+}: {
+  initialWishlist: Wishlist[]; deleteWishlist: (id: string) => Promise<void>; saveWishlist: (data: any) => Promise<void>; isLoggedIn: boolean;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-export default function WishlistClient({ initialData, isLoggedIn, saveWishlist, deleteWishlist }: Props) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [processingId, setProcessingId] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<WishlistItem | null>(null);
-
-  // 모달 제어
-  const openModal = (item?: WishlistItem) => {
-    setEditingItem(item || null);
-    setIsModalOpen(true);
-  };
-
-  // 등록/수정 제출
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    startTransition(async () => {
-      await saveWishlist(formData, editingItem?.id);
-      setIsModalOpen(false);
-    });
-  };
-
-  // 단순 삭제
-  const handleDelete = (id: string) => {
-    if (!confirm("위시리스트에서 삭제하시겠습니까?")) return;
-    setProcessingId(id);
-    startTransition(async () => {
-      await deleteWishlist(id);
-      setProcessingId(null);
-    });
-  };
-
-  // 관람 완료 (위시리스트에서 삭제 후 아카이브 등록창으로 이동)
-  const handleWatchComplete = (item: WishlistItem) => {
-    setProcessingId(item.id);
-    startTransition(async () => {
-      await deleteWishlist(item.id);
-      const params = new URLSearchParams();
-      params.set("title", item.title);
-      if (item.poster_url) params.set("poster_url", item.poster_url);
-      router.push(`/works/new?${params.toString()}`);
-    });
-  };
+    setLoading(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      await saveWishlist({ title: formData.get("title") as string, reason: formData.get("reason") as string });
+      setIsEditing(false);
+      window.location.reload();
+    } catch (err) {
+      alert("등록 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <>
-      <div className="flex justify-between items-center mb-8 h-10">
-        <h1 className="text-3xl font-black italic">Wishlist</h1>
+    <div className="pb-20">
+      <div className="flex justify-between items-end mb-12 border-b border-gray-100 pb-6">
+        <h1 className="text-4xl font-black text-black">Wishlist</h1>
         {isLoggedIn && (
-          <button 
-            onClick={() => openModal()} 
-            className="bg-white text-black px-4 py-2 rounded-full font-bold hover:bg-neutral-200 transition text-sm"
-          >
-            + NEW WISHLIST
+          <button onClick={() => setIsEditing(!isEditing)} className="bg-black text-white px-6 py-3 rounded-full font-bold shadow-lg hover:bg-gray-800 transition">
+            {isEditing ? "닫기" : "+ 작품 추가"}
           </button>
         )}
       </div>
 
-      {initialData.length === 0 ? (
-        <p className="text-neutral-500">아직 보고싶은 작품이 없습니다.</p>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {initialData.map((item) => (
-            <div 
-              key={item.id} 
-              className={`relative group bg-neutral-800 rounded-xl overflow-hidden transition flex flex-col h-full ${processingId === item.id ? 'opacity-50 pointer-events-none' : ''}`}
-            >
-              <div className="h-48 md:h-64 bg-neutral-900 relative shrink-0">
-                {item.poster_url ? (
-                  <img src={item.poster_url} alt={item.title} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-neutral-700 font-bold">NO POSTER</div>
-                )}
-                
-                {isLoggedIn && (
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
-                    <button onClick={() => openModal(item)} className="bg-white/20 hover:bg-white/40 text-white px-3 py-2 rounded-full font-bold transition text-xs">수정</button>
-                    <button onClick={() => handleDelete(item.id)} className="bg-rose-500/50 hover:bg-rose-500 text-white px-3 py-2 rounded-full font-bold transition text-xs">삭제</button>
-                  </div>
-                )}
-              </div>
-              
-              <div className="p-4 flex flex-col grow">
-                <h3 className="font-bold text-lg text-white mb-1">{item.title}</h3>
-                {item.expectation && <p className="text-xs text-neutral-400 line-clamp-2 grow">{item.expectation}</p>}
-                
-                {isLoggedIn && (
-                  <button 
-                    onClick={() => handleWatchComplete(item)}
-                    className="mt-4 w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded transition text-sm"
-                  >
-                    관람 완료 (아카이브로)
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+      {isEditing && (
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-3xl border border-gray-200 shadow-xl mb-16 space-y-4">
+          <input type="text" name="title" placeholder="보고 싶은 작품명" required className="w-full border border-gray-200 bg-gray-50 p-4 rounded-xl font-bold outline-none focus:border-black" />
+          <textarea name="reason" placeholder="이유나 기대평" rows={3} className="w-full border border-gray-200 bg-gray-50 p-4 rounded-xl outline-none focus:border-black"></textarea>
+          <button type="submit" disabled={loading} className="w-full bg-black text-white font-black py-4 rounded-xl mt-2 disabled:opacity-50">저장하기</button>
+        </form>
       )}
 
-      {isModalOpen && isLoggedIn && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-xl w-full max-w-md relative">
-            <h2 className="text-xl font-black mb-6 italic">{editingItem ? "EDIT WISHLIST" : "NEW WISHLIST"}</h2>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <input type="text" name="title" defaultValue={editingItem?.title} placeholder="작품 제목 (필수)" required className="bg-neutral-950 border border-neutral-800 rounded p-3 text-white outline-none focus:border-blue-500 transition" />
-              <input type="url" name="poster_url" defaultValue={editingItem?.poster_url} placeholder="포스터 이미지 URL (선택)" className="bg-neutral-950 border border-neutral-800 rounded p-3 text-white outline-none focus:border-blue-500 transition" />
-              <textarea name="expectation" defaultValue={editingItem?.expectation} placeholder="기대평 (선택)" className="bg-neutral-950 border border-neutral-800 rounded p-3 text-white outline-none focus:border-blue-500 transition h-24 resize-none" />
-              
-              <div className="flex justify-end gap-3 mt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 font-bold text-neutral-500 hover:text-white transition">취소</button>
-                <button type="submit" disabled={isPending} className="bg-white text-black px-6 py-2 rounded font-black hover:bg-neutral-200 transition disabled:opacity-50">
-                  {isPending ? "저장 중..." : "저장"}
-                </button>
-              </div>
-            </form>
+      <div className="grid md:grid-cols-2 gap-6">
+        {initialWishlist.map(item => (
+          <div key={item.id} className="p-6 bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition flex justify-between items-start">
+            <div>
+              <h3 className="text-xl font-bold text-black mb-2">{item.title}</h3>
+              <p className="text-sm text-gray-500">{item.reason}</p>
+            </div>
+            {isLoggedIn && (
+              <button onClick={async () => { if(confirm("삭제하시겠습니까?")) await deleteWishlist(item.id); window.location.reload(); }} className="text-gray-400 text-xs font-bold hover:text-red-500">삭제</button>
+            )}
           </div>
-        </div>
-      )}
-    </>
+        ))}
+      </div>
+    </div>
   );
 }
