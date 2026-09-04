@@ -40,16 +40,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-80px)] bg-neutral-900 p-6">
-      <div className="w-full max-w-[400px] bg-white rounded-[2.5rem] p-10 shadow-2xl">
+    <div className="flex items-center justify-center min-h-[calc(100vh-80px)] bg-neutral-900 p-4 sm:p-6">
+      <div className="w-full max-w-[460px] bg-white rounded-[2.5rem] p-8 sm:p-12 shadow-2xl">
         <div className="text-center mb-10">
-          <h1 className="text-2xl font-black tracking-tighter text-black uppercase">Admin Access</h1>
-          <p className="text-[11px] font-bold text-neutral-400 mt-2">기록고 관리를 위해 인증이 필요합니다</p>
+          <h1 className="text-2xl font-bold tracking-tight text-black uppercase">Login</h1>
+          <p className="text-sm font-medium text-neutral-600 mt-2">우리의 기록을 이어가려면 로그인해 주세요.</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase text-neutral-400 ml-1">Email Address</label>
+            <label className="text-xs font-semibold uppercase text-neutral-600 ml-1">ID</label>
             <input
               type="email"
               placeholder="admin@example.com"
@@ -61,7 +61,7 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase text-neutral-400 ml-1">Password</label>
+            <label className="text-xs font-semibold uppercase text-neutral-600 ml-1">Password</label>
             <input
               type="password"
               placeholder="••••••••"
@@ -79,17 +79,17 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-5 bg-black text-white rounded-2xl font-black uppercase tracking-widest hover:bg-neutral-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+            className="w-full py-5 bg-black text-white rounded-2xl font-semibold uppercase tracking-wide hover:bg-neutral-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
           >
-            {loading ? 'Authenticating...' : 'Enter'}
+            {loading ? 'Authenticating...' : 'Login'}
           </button>
         </form>
 
         <div className="mt-10 text-center">
-          <p className="text-[9px] font-black text-neutral-300 uppercase tracking-widest">
+          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">
             Private Archive System v1.1
           </p>
-          <Link href="/" className="inline-block mt-4 text-[10px] font-bold text-neutral-400 hover:text-black transition-colors underline">
+          <Link href="/" className="inline-block mt-4 text-xs font-semibold text-neutral-600 hover:text-black transition-colors underline">
             Back to Home
           </Link>
         </div>

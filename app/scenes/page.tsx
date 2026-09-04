@@ -107,16 +107,16 @@ export default function ScenesPage() {
   if (loading) return <div className="p-12 text-center text-neutral-400 font-bold">불러오는 중...</div>
 
   return (
-    <div className="max-w-7xl mx-auto p-10 min-h-screen pb-32">
+    <div className="max-w-7xl mx-auto p-5 md:p-10 min-h-screen pb-32">
       <header className="mb-14 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6">
         <div>
-          <h1 className="text-5xl font-black text-neutral-900 tracking-tighter mb-3 italic">Scene Selection</h1>
-          <p className="text-neutral-500 font-bold tracking-[0.3em] text-[10px] uppercase">Curated by Team INFP Collector</p>
+          <h1 className="text-4xl sm:text-5xl font-black text-neutral-900 tracking-tighter mb-3 italic">Scene Selection</h1>
+          <p className="text-neutral-600 font-bold tracking-widest text-xs uppercase">Curated by Team INFP Collector</p>
         </div>
         {isLoggedIn && (
           <button
             onClick={() => setShowForm(!showForm)}
-            className="inline-block bg-black text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl"
+            className="inline-block bg-black text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest hover:bg-neutral-800 transition-all shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-600 focus-visible:ring-offset-2"
           >
             {showForm ? '✕ 닫기' : '+ New Scene'}
           </button>
@@ -128,7 +128,7 @@ export default function ScenesPage() {
         <form onSubmit={handleSubmit} className="mb-14 bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100 text-black max-w-2xl">
           <h2 className="text-lg font-black mb-6">명장면 등록</h2>
           <div className="space-y-4">
-            <select onChange={handleWorkSelect} required className="w-full bg-gray-50 p-4 rounded-2xl font-bold text-black">
+            <select onChange={handleWorkSelect} required className="w-full bg-gray-50 p-4 rounded-2xl font-bold text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-600 focus-visible:ring-offset-2">
               <option value="">작품 선택</option>
               {works.map(w => <option key={w.id} value={w.id}>{w.title}</option>)}
             </select>
@@ -136,7 +136,7 @@ export default function ScenesPage() {
               placeholder="장면 설명 (선택)"
               value={formData.content}
               onChange={e => setFormData(prev => ({ ...prev, content: e.target.value }))}
-              className="w-full bg-gray-50 p-4 rounded-2xl h-24 outline-none"
+              className="w-full bg-gray-50 p-4 rounded-2xl h-24 outline-none focus-visible:ring-2 focus-visible:ring-neutral-600 focus-visible:ring-offset-2"
             />
             <input
               type="file" accept="image/*,video/*"
@@ -145,7 +145,7 @@ export default function ScenesPage() {
             />
           </div>
           <button type="submit" disabled={isUploading}
-            className="mt-6 w-full py-4 bg-black text-white rounded-[2rem] font-black hover:bg-blue-600 transition-all">
+            className="mt-6 w-full py-4 bg-black text-white rounded-[2rem] font-black hover:bg-neutral-800 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-600 focus-visible:ring-offset-2">
             {isUploading ? 'UPLOADING...' : 'ADD SCENE'}
           </button>
         </form>
@@ -160,7 +160,7 @@ export default function ScenesPage() {
             <Link
               key={scene.id}
               href={`/scenes/${scene.id}`}
-              className="break-inside-avoid group relative bg-white rounded-2xl overflow-hidden shadow-lg border border-neutral-100 hover:border-blue-400 transition-all block"
+              className="break-inside-avoid group relative bg-white rounded-2xl overflow-hidden shadow-lg border border-neutral-200 hover:border-neutral-400 transition-all block"
             >
               {scene.image_url && (
                 <img
@@ -170,8 +170,8 @@ export default function ScenesPage() {
                 />
               )}
               <div className="p-4">
-                <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-1">{scene.work_title}</p>
-                {scene.content && <p className="text-sm text-gray-600 line-clamp-2">{scene.content}</p>}
+                <p className="text-xs font-black text-neutral-900 uppercase tracking-widest mb-1 group-hover:underline underline-offset-4">{scene.work_title}</p>
+                {scene.content && <p className="text-sm text-neutral-700 line-clamp-2">{scene.content}</p>}
               </div>
               {isAdmin && (
                 <button

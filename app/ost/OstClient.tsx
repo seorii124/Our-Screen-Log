@@ -79,9 +79,9 @@ export default function OstClient({
 
   return (
     <div className="pb-20">
-      <div className="flex justify-between items-end mb-12 border-b border-gray-100 pb-6">
+      <div className="flex justify-between items-end mb-8 border-b border-gray-100 pb-6">
         <div>
-          <h1 className="text-3xl font-black text-black tracking-tight">OST</h1>
+          <h1 className="text-4xl font-black text-black tracking-tight">OST</h1>
           <p className="text-sm font-bold text-gray-400">Our Music Collection</p>
         </div>
         {isLoggedIn && (
@@ -135,8 +135,21 @@ export default function OstClient({
               <p className="text-sm font-bold text-gray-400 mb-6">{ost.artist}</p>
 
               <div className="flex items-center justify-center gap-6 mb-8">
-                <button onClick={() => setPlayingId(isPlaying ? null : ost.id)} className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center shadow-md hover:scale-105 transition transform pl-1">
-                  {isPlaying ? "⏸" : "▶"}
+                <button
+                  onClick={() => setPlayingId(isPlaying ? null : ost.id)}
+                  aria-label={isPlaying ? "일시정지" : "재생"}
+                  className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center shadow-md hover:scale-105 transition transform"
+                >
+                  {isPlaying ? (
+                    <svg aria-hidden="true" viewBox="0 0 16 16" className="w-4 h-4" fill="currentColor">
+                      <rect x="3.5" y="3" width="3.25" height="10" rx="0.5" />
+                      <rect x="9.25" y="3" width="3.25" height="10" rx="0.5" />
+                    </svg>
+                  ) : (
+                    <svg aria-hidden="true" viewBox="0 0 16 16" className="w-4 h-4 translate-x-px" fill="currentColor">
+                      <path d="M4.5 2.75a.75.75 0 0 1 1.14-.64l7.25 4.62a1.5 1.5 0 0 1 0 2.54L5.64 13.9a.75.75 0 0 1-1.14-.64V2.75Z" />
+                    </svg>
+                  )}
                 </button>
               </div>
 
@@ -145,10 +158,10 @@ export default function OstClient({
               )}
 
               <div className="w-full mt-auto pt-4 border-t border-gray-50 flex flex-col items-center gap-2">
-                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{ost.media_title}</div>
+                <div className="text-xs text-neutral-600 font-medium uppercase tracking-wide">{ost.media_title}</div>
                 {isLoggedIn && (
                   <div className="flex gap-4">
-                    <button onClick={() => { setEditingId(ost.id); setIsEditing(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-blue-500 text-xs font-bold hover:underline">수정</button>
+                    <button onClick={() => { setEditingId(ost.id); setIsEditing(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-neutral-700 text-xs font-bold hover:underline">수정</button>
                     <button onClick={async () => { if(confirm("삭제하시겠습니까?")) { await deleteOst(ost.id); window.location.reload(); } }} className="text-gray-300 text-xs font-bold hover:text-red-500">삭제</button>
                   </div>
                 )}

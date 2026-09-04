@@ -80,22 +80,22 @@ export default function StatsPage() {
     <div className="max-w-5xl mx-auto p-10 min-h-screen pb-32">
       <header className="mb-12">
         {/* 요청하신 블랙 타이틀 및 불필요한 부제목 삭제 적용 완료 */}
-        <h1 className="text-4xl font-black text-neutral-900 tracking-tighter italic uppercase">Watching Analysis</h1>
-        <p className="text-neutral-400 text-xs font-bold mt-2 uppercase tracking-widest">Team INFP Collector Archive</p>
+        <h1 className="text-4xl font-black text-neutral-900 tracking-tight">Watching Analysis</h1>
+        <p className="text-neutral-500 text-xs font-medium mt-2 uppercase tracking-wide">Team INFP Collector Archive</p>
       </header>
 
       {/* 1. 총 미디어 개수 (요청하신 3칸 디자인) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-black text-gray-400 uppercase mb-2">Total Media</p>
+          <p className="text-xs font-bold text-gray-400 uppercase mb-2">Total Media</p>
           <p className="text-3xl font-black text-black">{stats.totalCount} <span className="text-sm text-gray-300">WORKS</span></p>
         </div>
         <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-black text-gray-400 uppercase mb-2">Total Movies</p>
+          <p className="text-xs font-bold text-gray-400 uppercase mb-2">Total Movies</p>
           <p className="text-3xl font-black text-black">{stats.movieCount} <span className="text-sm text-gray-300">FILMS</span></p>
         </div>
         <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-black text-gray-400 uppercase mb-2">Total Dramas</p>
+          <p className="text-xs font-bold text-gray-400 uppercase mb-2">Total Dramas</p>
           <p className="text-3xl font-black text-black">{stats.dramaCount} <span className="text-sm text-gray-300">SERIES</span></p>
         </div>
       </div>
@@ -104,21 +104,21 @@ export default function StatsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <div className="bg-blue-50/50 p-6 rounded-[2rem] border border-blue-100/50 flex justify-between items-center">
           <div>
-            <p className="text-[10px] font-black text-blue-400 uppercase mb-1">Member 1</p>
+            <p className="text-xs font-bold text-blue-400 uppercase mb-1">Member 1</p>
             <p className="text-xl font-black text-blue-600">❄️ Avg</p>
           </div>
           <p className="text-3xl font-black text-blue-600">⭐ {stats.m1Avg}</p>
         </div>
         <div className="bg-purple-50/50 p-6 rounded-[2rem] border border-purple-100/50 flex justify-between items-center">
           <div>
-            <p className="text-[10px] font-black text-purple-400 uppercase mb-1">Member 2</p>
+            <p className="text-xs font-bold text-purple-400 uppercase mb-1">Member 2</p>
             <p className="text-xl font-black text-purple-600">🍇 Avg</p>
           </div>
           <p className="text-3xl font-black text-purple-600">⭐ {stats.m2Avg}</p>
         </div>
         <div className="bg-yellow-50/50 p-6 rounded-[2rem] border border-yellow-100/50 flex justify-between items-center">
           <div>
-            <p className="text-[10px] font-black text-yellow-600 uppercase mb-1">Member 3</p>
+            <p className="text-xs font-bold text-yellow-600 uppercase mb-1">Member 3</p>
             <p className="text-xl font-black text-yellow-600">🍦 Avg</p>
           </div>
           <p className="text-3xl font-black text-yellow-600">⭐ {stats.m3Avg}</p>
@@ -126,10 +126,10 @@ export default function StatsPage() {
       </div>
 
       {/* 3. 월별 차트 (블랙 테마 + 하단 세부 지표) */}
-      <section className="bg-black p-10 rounded-[3rem] shadow-2xl text-white">
+      <section className="bg-black p-10 rounded-[3rem] shadow-2xl text-white overflow-x-auto md:overflow-visible">
         <h2 className="text-xl font-black mb-12 border-b border-gray-800 pb-4">월별 시청 작품 수 추이</h2>
         
-        <div className="relative h-72 flex items-end justify-between gap-2 md:gap-4 mt-8">
+        <div className="relative h-72 min-w-max md:min-w-0 flex items-end justify-between gap-2 md:gap-4 mt-8">
           <div className="absolute inset-0 flex flex-col justify-between pointer-events-none text-[10px] text-gray-700 font-bold z-0">
             <div className="border-b border-gray-800 w-full pb-1 text-right pr-2">{stats.maxCount}편</div>
             <div className="border-b border-gray-800 w-full pb-1 text-right pr-2">{Math.ceil(stats.maxCount * 0.5)}편</div>
@@ -150,7 +150,7 @@ export default function StatsPage() {
               </div>
               
               <div className="text-[10px] text-gray-400 mt-4 whitespace-nowrap font-bold">{d.name}</div>
-              <div className="text-[9px] text-gray-600 mt-1 font-bold">
+              <div className="text-[10px] text-gray-600 mt-1 font-bold">
                 🎬{d.movie} 📺{d.drama}
               </div>
             </div>

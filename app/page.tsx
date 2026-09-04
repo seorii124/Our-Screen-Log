@@ -54,14 +54,14 @@ export default function Home() {
     <div className="max-w-7xl mx-auto p-10 min-h-screen pb-32">
       <header className="mb-14 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6">
         <div>
-          <h1 className="text-5xl font-black text-neutral-900 tracking-tighter mb-3 italic">Archive Content</h1>
-          <p className="text-neutral-500 font-bold tracking-[0.3em] text-[10px] uppercase">Curated by Team INFP Collector</p>
+          <h1 className="text-5xl font-bold text-neutral-900 tracking-tight mb-3">Archive Content</h1>
+          <p className="text-neutral-500 font-medium tracking-wide text-xs uppercase">Curated by Team INFP Collector</p>
         </div>
         {/* 관리자/직원에게만 진열장 수정 버튼 노출 */}
         {user && (
           <Link
             href="/admin"
-            className="inline-block bg-black text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl text-center"
+            className="inline-block bg-black text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest hover:bg-neutral-800 transition-all shadow-xl text-center"
           >
             + New Record
           </Link>
@@ -75,11 +75,11 @@ export default function Home() {
               key={t}
               onClick={() => setSortType(t)}
               className={`text-xs font-black uppercase tracking-widest transition-all relative ${
-                sortType === t ? 'text-blue-600' : 'text-neutral-400 hover:text-black'
+                sortType === t ? 'text-black' : 'text-neutral-500 hover:text-black'
               }`}
             >
               {t === 'latest' ? '최신순' : t === 'high' ? '평점 높은순' : '평점 낮은순'}
-              {sortType === t && <div className="absolute -bottom-8 left-0 w-full h-0.5 bg-blue-600"></div>}
+              {sortType === t && <div className="absolute -bottom-8 left-0 w-full h-0.5 bg-black"></div>}
             </button>
           ))}
         </div>
@@ -90,16 +90,16 @@ export default function Home() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-14">
         {works.map((work) => (
-          <div key={work.id} onClick={() => router.push(`/works/${work.id}`)} className="group cursor-pointer">
-            <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200 group-hover:border-blue-500 transition-all duration-300 shadow-lg">
-              <img src={work.poster_url || ''} alt={work.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-              <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2 py-1 rounded text-[10px] font-black text-yellow-400 border border-neutral-700">
+          <div key={work.id} onClick={() => router.push(`/works/${work.id}`)} className="group cursor-pointer transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:z-10">
+            <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200 group-hover:border-neutral-400 transition-all duration-300 shadow-lg group-hover:shadow-2xl">
+              <img src={work.poster_url || ''} alt={work.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" />
+              <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2 py-1 rounded text-xs font-semibold text-yellow-400 border border-neutral-700">
                 ★ {work.average_rating.toFixed(1)}
               </div>
             </div>
             <div className="mt-5 space-y-1">
-              <h2 className="font-bold text-base text-neutral-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{work.title}</h2>
-              <div className="flex items-center gap-2 text-[10px] font-bold text-neutral-500 uppercase tracking-tighter">
+              <h2 className="font-bold text-base text-neutral-900 line-clamp-1 group-hover:text-neutral-600 transition-colors">{work.title}</h2>
+              <div className="flex items-center gap-2 text-xs font-medium text-neutral-500 uppercase tracking-normal">
                 <span>{work.category}</span>
                 <span>•</span>
                 <span>{work.viewing_period}</span>

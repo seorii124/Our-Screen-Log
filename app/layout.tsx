@@ -46,24 +46,24 @@ export default async function RootLayout({
       <body className={`${inter.className} bg-white text-black min-h-screen flex flex-col overflow-x-hidden selection:bg-gray-200`}>
         <AuthListener />
         
-        <nav className="flex justify-between items-center px-4 md:px-10 py-4 border-b border-neutral-100 bg-black sticky top-0 z-50 w-full min-h-[70px]">
-          <div className="flex items-center justify-between w-full md:w-auto gap-4 md:gap-12">
+        <nav className="flex flex-col md:flex-row justify-between items-stretch md:items-center px-4 md:px-10 py-4 border-b border-neutral-100 bg-black sticky top-0 z-50 w-full min-h-[70px]">
+          <div className="flex flex-col md:flex-row items-center justify-between w-full md:w-auto gap-4 md:gap-12">
             {/* 🍿 아이콘 제거 및 깔끔한 폰트 적용 */}
             <a href="/" className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center">
               OUR SCREEN LOG
             </a>
             
-            <div className="flex items-center gap-4 md:gap-10 text-[12px] md:text-sm font-bold text-gray-300">
-              <a href="/actors" className="hover:text-white transition">배우</a>
-              <a href="/ost" className="hover:text-white transition">OST</a>
-              <a href="/scenes" className="hover:text-white transition">명장면</a>
-              <a href="/lines" className="hover:text-white transition">명대사</a>
-              <a href="/stats" className="hover:text-white transition">통계</a>
-              <a href="/wishlist" className="hover:text-white transition">보고싶어요</a>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 md:gap-10 text-sm md:text-[15px] font-bold text-neutral-300">
+              <a href="/actors" className="hover:text-white transition-colors">배우</a>
+              <a href="/ost" className="hover:text-white transition-colors">OST</a>
+              <a href="/scenes" className="hover:text-white transition-colors">명장면</a>
+              <a href="/lines" className="hover:text-white transition-colors">명대사</a>
+              <a href="/stats" className="hover:text-white transition-colors">통계</a>
+              <a href="/wishlist" className="hover:text-white transition-colors">보고싶어요</a>
             </div>
           </div>
           
-          <div className="hidden md:flex items-center gap-6 border-l border-neutral-800 pl-6">
+          <div className="hidden md:flex items-center gap-6">
             {user ? (
               <div className="flex items-center gap-5">
                 <a href="/my-log" className="text-sm font-bold text-white hover:text-gray-300 transition">
@@ -74,8 +74,8 @@ export default async function RootLayout({
                 </a>
               </div>
             ) : (
-              <a href="/login" className="text-sm font-bold text-blue-400 hover:text-blue-300 transition">
-                Admin Login
+              <a href="/login" className="text-sm font-bold text-neutral-200 hover:text-white transition">
+                Login
               </a>
             )}
           </div>

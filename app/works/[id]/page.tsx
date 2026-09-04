@@ -23,11 +23,11 @@ export default async function WorkDetailPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
   const { data: work } = await supabase.from('works').select('*').eq('id', id).single();
 
-  if (!work) return <div className="p-10 text-white font-bold tracking-widest flex items-center justify-center min-h-[50vh]">작품을 찾을 수 없습니다.</div>;
+  if (!work) return <div className="p-10 text-neutral-700 font-bold tracking-widest flex items-center justify-center min-h-[50vh]">작품을 찾을 수 없습니다.</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-10 min-h-screen text-white">
-      <Link href="/" className="mb-8 inline-block text-neutral-400 text-xs font-bold hover:text-white transition">
+    <div className="max-w-4xl mx-auto p-10 min-h-screen text-neutral-900">
+      <Link href="/" className="mb-8 inline-block text-neutral-500 text-xs font-bold hover:text-black transition">
         ← 목록으로 돌아가기
       </Link>
       
@@ -37,25 +37,25 @@ export default async function WorkDetailPage({ params }: Props) {
         </div>
         
         <div>
-          <h1 className="text-4xl font-black mb-4 italic tracking-tight">{work.title}</h1>
-          <p className="text-neutral-400 mb-8 font-bold">{work.category} • {work.viewing_period}</p>
+          <h1 className="text-4xl font-bold mb-4 tracking-tight">{work.title}</h1>
+          <p className="text-neutral-600 mb-8 font-medium">{work.category} • {work.viewing_period}</p>
           
           <div className="space-y-6">
             {[1, 2, 3].map(n => (
               work[`m${n}_review`] && (
-                <div key={n} className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-sm transition hover:border-neutral-700">
+                <div key={n} className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm transition hover:border-neutral-300">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="font-bold text-sm text-neutral-300">Member {n}</span>
-                    <span className="text-yellow-400 font-black text-lg">★ {work[`m${n}_rating`]}</span>
+                    <span className="font-bold text-sm text-neutral-700">{['❄️', '🍇', '🍦'][n - 1]}</span>
+                    <span className="text-neutral-900 font-black text-lg">★ {work[`m${n}_rating`]}</span>
                   </div>
-                  <p className="text-neutral-200 leading-relaxed text-sm">{work[`m${n}_review`]}</p>
+                  <p className="text-neutral-700 leading-7 text-base">{work[`m${n}_review`]}</p>
                 </div>
               )
             ))}
           </div>
           
           {user && (
-            <Link href={`/works/${id}/edit`} className="mt-10 block w-full text-center py-4 bg-white text-black rounded-full font-black hover:bg-neutral-200 transition shadow-lg">
+            <Link href={`/works/${id}/edit`} className="mt-10 block w-full text-center py-4 bg-white text-black rounded-full font-semibold hover:bg-neutral-200 transition shadow-lg">
               내용 수정하기
             </Link>
           )}

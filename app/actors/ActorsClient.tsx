@@ -122,7 +122,7 @@ export default function ActorsClient({
     <div className="pb-20">
       <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-12 gap-6 border-b border-gray-100 pb-6">
         <div>
-          <h1 className="text-4xl font-black text-black mb-6">Actors</h1>
+          <h1 className="text-4xl font-black text-black mb-6 tracking-tight">Actors</h1>
           <div className="flex flex-wrap gap-2">
             <button onClick={() => setSelectedFilter("전체")} className={`px-4 py-2 text-sm font-bold rounded-full transition shadow-sm ${selectedFilter === "전체" ? "bg-black text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>전체 보기</button>
             {MEMBERS.map(member => (
@@ -223,9 +223,10 @@ export default function ActorsClient({
 
       {/* 모달 창 (기존과 동일) */}
       {selectedActor && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200" onClick={() => setSelectedActor(null)}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-start md:items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200" onClick={() => setSelectedActor(null)}>
           <div className="bg-white rounded-3xl w-full max-w-4xl my-8 overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
             <button onClick={() => setSelectedActor(null)} className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full text-gray-600 font-bold hover:bg-gray-200 hover:scale-110 transition z-10">✕</button>
+            <div className="max-h-[calc(100dvh-6rem)] overflow-y-auto overscroll-contain md:max-h-none md:overflow-visible md:overscroll-auto">
             <div className="flex flex-col md:flex-row">
               {selectedActor.main_photo_url && (
                 <div className="md:w-5/12 aspect-[3/4] md:aspect-auto md:min-h-[600px] bg-gray-50">
@@ -275,6 +276,7 @@ export default function ActorsClient({
                   </div>
                 )}
               </div>
+            </div>
             </div>
           </div>
         </div>
