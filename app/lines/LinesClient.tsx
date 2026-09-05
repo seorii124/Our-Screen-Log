@@ -87,7 +87,7 @@ export default function LinesClient({
       <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-10 border-b border-gray-100 pb-6 gap-4">
         <div>
           <h1 className="text-4xl font-black text-black mb-1 tracking-tight">Lines</h1>
-          <p className="text-neutral-500 font-medium tracking-wide text-xs uppercase">CURATED BY TEAM INFP COLLECTOR</p>
+          <p className="text-neutral-600 font-bold tracking-widest text-xs uppercase">CURATED BY TEAM INFP COLLECTOR</p>
         </div>
         {isLoggedIn && (
           <button 

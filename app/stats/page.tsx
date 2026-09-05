@@ -81,7 +81,7 @@ export default function StatsPage() {
       <header className="mb-12">
         {/* 요청하신 블랙 타이틀 및 불필요한 부제목 삭제 적용 완료 */}
         <h1 className="text-4xl font-black text-neutral-900 tracking-tight">Watching Analysis</h1>
-        <p className="text-neutral-500 text-xs font-medium mt-2 uppercase tracking-wide">Team INFP Collector Archive</p>
+        <p className="text-neutral-600 text-xs font-bold mt-2 uppercase tracking-widest">Team INFP Collector Archive</p>
       </header>
 
       {/* 1. 총 미디어 개수 (요청하신 3칸 디자인) */}
