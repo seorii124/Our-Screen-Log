@@ -54,12 +54,12 @@ export default async function RootLayout({
             </a>
             
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 md:gap-10 text-sm md:text-[15px] font-bold text-neutral-300">
-              <a href="/actors" className="hover:text-white transition-colors">배우</a>
-              <a href="/ost" className="hover:text-white transition-colors">OST</a>
-              <a href="/scenes" className="hover:text-white transition-colors">명장면</a>
-              <a href="/lines" className="hover:text-white transition-colors">명대사</a>
-              <a href="/stats" className="hover:text-white transition-colors">통계</a>
-              <a href="/wishlist" className="hover:text-white transition-colors">보고싶어요</a>
+              <a href="/actors" className="no-underline hover:no-underline hover:text-white transition-colors">배우</a>
+              <a href="/ost" className="no-underline hover:no-underline hover:text-white transition-colors">OST</a>
+              <a href="/scenes" className="no-underline hover:no-underline hover:text-white transition-colors">명장면</a>
+              <a href="/lines" className="no-underline hover:no-underline hover:text-white transition-colors">명대사</a>
+              <a href="/stats" className="no-underline hover:no-underline hover:text-white transition-colors">통계</a>
+              <a href="/wishlist" className="no-underline hover:no-underline hover:text-white transition-colors">보고싶어요</a>
             </div>
           </div>
           

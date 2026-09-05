@@ -54,7 +54,7 @@ export default function Home() {
     <div className="max-w-7xl mx-auto p-10 min-h-screen pb-32">
       <header className="mb-14 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6">
         <div>
-          <h1 className="text-5xl font-bold text-neutral-900 tracking-tight mb-3">Archive Content</h1>
+          <h1 className="text-4xl font-black text-neutral-900 tracking-tight mb-3">Archive Content</h1>
           <p className="text-neutral-600 font-bold tracking-widest text-xs uppercase">Curated by Team INFP Collector</p>
         </div>
         {/* 관리자/직원에게만 진열장 수정 버튼 노출 */}
